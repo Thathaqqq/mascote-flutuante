@@ -267,17 +267,20 @@ class Mascote:
         if self.chat_rodando:
             estados.add("trabalhando")
         novo = next((e for e in PRIORIDADE if e in estados), "ocioso")
-        # som: só para a conversa que acabou de chamar e está com som ligado
+        # som: só para a conversa que acabou de terminar ou de pedir algo, e com som ligado.
+        # Conta os términos e pedidos gravados pelo gancho, para não perder os que duram menos de 1 s.
         tocou = False
         agora_por_sessao = {}
         for s in self.sessoes:
-            e, sid = s.get("estado"), s["sessao"]
-            agora_por_sessao[sid] = (e, s.get("quando"))
+            sid = s["sessao"]
+            marca = (s.get("fins", 0), s.get("chamadas", 0), s.get("estado"))
+            agora_por_sessao[sid] = marca
             antes = self.estado_por_sessao.get(sid)
-            mudou = antes is None or antes != (e, s.get("quando"))
-            if (self.iniciado and not tocou and mudou and e in ("esperando", "pronto")
-                    and (antes is None or antes[0] != e) and self.som_da(sid)):
-                plataforma.tocar_som(e)
+            if not self.iniciado or antes is None or tocou or not self.som_da(sid):
+                continue
+            entrou = marca[2] != antes[2] and marca[2] in ("esperando", "pronto")
+            if marca[1] > antes[1] or marca[0] > antes[0] or entrou:
+                plataforma.tocar_som(marca[2], self.cfg.get("som_nome"))
                 tocou = True
         self.estado_por_sessao = agora_por_sessao
         self.estado = novo
@@ -686,6 +689,11 @@ class Mascote:
         salvar_config(self.cfg)
         self.preencher_bandeja(forcar=True)
 
+    def escolher_som(self, nome):
+        self.cfg["som_nome"] = nome
+        salvar_config(self.cfg)
+        plataforma.tocar_som(nome=nome)  # toca para a pessoa ouvir como fica
+
     def chamando(self):
         """Conversas que pedem atenção: primeiro as que precisam de você, depois travadas e prontas."""
         lista = []
@@ -744,6 +752,12 @@ class Mascote:
         self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
         m.add_checkbutton(label="Aviso sonoro (padrão das conversas)", variable=self._v_som,
                           command=lambda: self.alternar("som", True))
+        sons = tk.Menu(m, tearoff=0)
+        self._v_som_nome = tk.StringVar(value=self.cfg.get("som_nome", plataforma.SOM_PADRAO))
+        for nome in plataforma.SONS:
+            sons.add_radiobutton(label=nome, value=nome, variable=self._v_som_nome,
+                                 command=lambda n=nome: self.escolher_som(n))
+        m.add_cascade(label="Som do aviso", menu=sons)
         if plataforma.POUSO_DISPONIVEL:
             m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
                               command=lambda: self.alternar("pousar", False))

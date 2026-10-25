@@ -56,6 +56,8 @@ def main():
         "pedido": anterior.get("pedido", ""),
         "aviso": "",
         "quando": time.time(),
+        "fins": anterior.get("fins", 0) + (1 if evento == "Stop" else 0),  # quantas vezes terminou
+        "chamadas": anterior.get("chamadas", 0) + (1 if evento == "Notification" else 0),
     }
     if evento == "UserPromptSubmit":
         pedido = " ".join((dados.get("prompt") or "").split())

@@ -18,7 +18,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 - Os olhos acompanham o cursor do mouse; ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
-- Aviso sonoro: um som discreto do sistema quando uma conversa precisa de você ou termina. Na lista de conversas, cada uma tem "Som ligado" ou "Sem som": clique para escolher só para aquela conversa. O "Aviso sonoro" do menu vale para as conversas que você não ajustou.
+- Aviso sonoro: um som discreto do sistema quando uma conversa precisa de você ou termina. Na lista de conversas, cada uma tem "Som ligado" ou "Sem som": clique para escolher só para aquela conversa. O "Aviso sonoro" do menu vale para as conversas que você não ajustou. Em "Som do aviso", no menu, você escolhe o som (Notificação, Mensagem, E-mail, Calendário ou Sino); ao escolher, ele toca para você ouvir.
 - Pousar na janela ativa (só Windows por enquanto): ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
 - Arraste para mudar de lugar; ele lembra onde ficou.
 

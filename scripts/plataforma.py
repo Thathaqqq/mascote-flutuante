@@ -133,15 +133,32 @@ def abrir(alvo):
         subprocess.Popen(["xdg-open", alvo])
 
 
-def tocar_som(tipo):
-    """Som discreto do sistema: 'esperando' ou 'pronto'."""
+if WIN:
+    _MIDIA = Path(os.environ.get("WINDIR", "C:/Windows")) / "Media"
+    SONS = {"Notificação": "Windows Notify System Generic.wav", "Mensagem": "Windows Notify Messaging.wav",
+            "E-mail": "Windows Notify Email.wav", "Calendário": "Windows Notify Calendar.wav",
+            "Sino": "Windows Notify.wav"}
+elif MAC:
+    _MIDIA = Path("/System/Library/Sounds")
+    SONS = {"Notificação": "Glass.aiff", "Mensagem": "Ping.aiff", "E-mail": "Pop.aiff",
+            "Calendário": "Hero.aiff", "Sino": "Purr.aiff"}
+else:
+    _MIDIA, SONS = Path("."), {}
+SOM_PADRAO = "Notificação"
+
+
+def tocar_som(tipo=None, nome=None):
+    """Toca o som escolhido (nome de SONS). Se o arquivo não existir, usa o aviso do sistema."""
+    arq = _MIDIA / SONS.get(nome or SOM_PADRAO, "")
     try:
         if WIN:
             import winsound
-            winsound.MessageBeep(0x40 if tipo == "esperando" else 0)
+            if arq.is_file():
+                winsound.PlaySound(str(arq), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+            else:
+                winsound.MessageBeep(0x40)
         elif MAC:
-            som = "Ping" if tipo == "esperando" else "Glass"
-            subprocess.Popen(["afplay", f"/System/Library/Sounds/{som}.aiff"])
+            subprocess.Popen(["afplay", str(arq)] if arq.is_file() else ["osascript", "-e", "beep"])
     except Exception:
         pass
 
