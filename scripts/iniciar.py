@@ -5,6 +5,7 @@
   python iniciar.py parar        desliga
   python iniciar.py recarregar   relê configuração e personagens
   python iniciar.py validar ARQ  confere um personagem personalizado
+  python iniciar.py foto FOTO NOME   cria um personagem a partir de uma foto (tira o fundo se for liso)
   python iniciar.py config CHAVE VALOR   ex.: config personagem Gato | config mini sim
 """
 import json
@@ -58,7 +59,7 @@ def validar(caminho):
         return False
     if not p.get("nome"):
         erros.append("falta 'nome'")
-    if p.get("tipo") == "borboleta3d":
+    if p.get("tipo") in ("borboleta3d", "foto"):
         img = Path(caminho).parent / p.get("imagem", "")
         if not img.is_file():
             erros.append(f"não achei a imagem '{p.get('imagem')}' na mesma pasta")
@@ -104,6 +105,13 @@ def main():
         enviar("recarregar")
     elif acao == "validar":
         sys.exit(0 if validar(sys.argv[2]) else 1)
+    elif acao == "foto":
+        sys.path.insert(0, str(AQUI))
+        import recorte
+        arq, aviso = recorte.criar_personagem(sys.argv[2], " ".join(sys.argv[3:]))
+        print(f"Personagem criado: {arq}")
+        if aviso:
+            print(aviso)
     elif acao == "config":
         chave, valor = sys.argv[2], " ".join(sys.argv[3:])
         cfg = ler_config()

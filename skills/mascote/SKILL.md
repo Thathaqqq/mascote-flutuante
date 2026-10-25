@@ -24,6 +24,18 @@ Personagens prontos: Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma
 
 Requisito para o 3D e para as bordas suaves: Pillow (`python -m pip install pillow`). Sem ele o mascote funciona, mas só com os personagens de quadradinhos. Se faltar, pergunte à pessoa antes de instalar.
 
+## Criar um personagem com a foto de um bicho (ou pessoa, objeto)
+
+O jeito mais simples: botão direito no mascote > Personagem > Criar personagem com foto... A pessoa escolhe a foto e dá um nome.
+
+Pelo Claude:
+1. Peça o caminho da foto. Melhor: foto de corpo inteiro, de frente ou de lado, com fundo liso.
+2. Rode `iniciar.py foto "<foto>" <Nome>`. Se a foto tiver fundo liso, o fundo sai sozinho; se for PNG recortado, usa como está.
+3. Se der erro de fundo, recorte antes: com o conector do Canva (remover fundo), se estiver disponível, ou no Paint do Windows (Remover plano de fundo). Depois rode de novo com o PNG.
+4. Mostre o recorte à pessoa (abra o PNG criado em `~/.claude/mascote/personagens/`) e aplique com `iniciar.py config personagem "<Nome>"`.
+
+O personagem de foto ganha volume, vira para o lado do cursor, inclina a cabeça, respira e pula. Para não espelhar a foto (ex.: tem texto), acrescente `"espelhar": false` no .json.
+
 ## Criar uma borboleta 3D a partir de uma foto
 
 Serve para qualquer borboleta fotografada de cima, de asas abertas.

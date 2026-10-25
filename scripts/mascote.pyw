@@ -24,6 +24,8 @@ from pathlib import Path
 try:
     from PIL import Image, ImageChops, ImageDraw, ImageFont
     import borboleta3d
+    import foto3d
+    import recorte
     TEM_PIL = True
 except Exception:
     TEM_PIL = False
@@ -80,7 +82,7 @@ def salvar_config(cfg):
 
 
 def eh_3d(p):
-    return p.get("tipo") == "borboleta3d"
+    return p.get("tipo") in ("borboleta3d", "foto")
 
 
 def carregar_personagens():
@@ -258,6 +260,7 @@ class Mascote:
         self.chat_rodando = False
         self.borboletas = {}
         self.voo = borboleta3d.Voo() if TEM_PIL else None
+        self.bicho = foto3d.Bicho() if TEM_PIL else None
         self.cache_img = {}
 
         self.root = tk.Tk()
@@ -306,8 +309,11 @@ class Mascote:
         mini = bool(self.cfg.get("mini"))
         chave = (p["_imagem"], mini)
         if chave not in self.borboletas:
-            self.borboletas[chave] = borboleta3d.Borboleta3D(p["_imagem"], p.get("centro", 0.5),
-                                                             58 if mini else 150)
+            if p.get("tipo") == "foto":
+                self.borboletas[chave] = foto3d.Foto3D(p["_imagem"], 54 if mini else 130)
+            else:
+                self.borboletas[chave] = borboleta3d.Borboleta3D(p["_imagem"], p.get("centro", 0.5),
+                                                                 58 if mini else 150)
         return self.borboletas[chave]
 
     # --- comandos de fora (iniciar.py) ---
@@ -384,6 +390,7 @@ class Mascote:
             agora = math.hypot(*self.rel_cursor)
             if vel > 1800 and agora < 230 and agora < antes and not self.cursor_dentro:
                 self.voo.susto()
+                self.bicho.susto()
         self.ultimo_cursor = (cx, cy)
 
         if clicou_agora() and not self.cursor_dentro:
@@ -391,6 +398,7 @@ class Mascote:
             self.olhar_clique = (self.quadro + 30, self.dir_olhar)
             if self.voo:
                 self.voo.agito()
+                self.bicho.agito()
 
         self.andando = False
         if self.cfg.get("seguir") and not self.arraste:
@@ -524,11 +532,34 @@ class Mascote:
         caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
         return y0 + caixa[1], x0 + caixa[2] - (10 if mini else 26)
 
+    # personagem de foto
+    def desenhar_foto(self, tela, dt):
+        p = self.personagem()
+        mini = self.cfg.get("mini")
+        modelo = self.borboleta(p)
+        yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
+            dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
+            p.get("espelhar", True))
+        if mini:
+            alt *= 0.4
+        sprite, (px_, py_) = modelo.desenhar(yaw, pitch, roll, amasso, lado, brilho)
+        chao = self.altura - (8 if mini else 16)
+        meio = self.largura / 2
+        caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
+        base = sprite.crop((caixa[0], caixa[3] - max(2, (caixa[3] - caixa[1]) // 4), caixa[2], caixa[3]))
+        sombra = borboleta3d.sombra_de(base, alt)
+        tela.alpha_composite(sombra, (int(meio - sombra.width / 2), int(chao - sombra.height / 2)))
+        x0, y0 = int(meio - px_), int(chao - py_ - alt)
+        tela.alpha_composite(sprite, (max(0, x0), max(0, y0)), (max(0, -x0), max(0, -y0)))
+        return y0 + caixa[1], x0 + caixa[2] - (6 if mini else 14)
+
     def desenhar_imagem(self, dt):
         tela = Image.new("RGBA", (self.largura, self.altura), (0, 0, 0, 0))
         e = self.estado
         mini = self.cfg.get("mini")
-        if eh_3d(self.personagem()):
+        if self.personagem().get("tipo") == "foto":
+            topo, direita = self.desenhar_foto(tela, dt)
+        elif eh_3d(self.personagem()):
             topo, direita = self.desenhar_borboleta(tela, dt)
         else:
             topo, direita = self.desenhar_pixel(tela)
@@ -702,6 +733,8 @@ class Mascote:
             sub.add_radiobutton(label=nome, value=nome, variable=self._v_pers,
                                 command=lambda n=nome: self.trocar_personagem(n))
         sub.add_separator()
+        if TEM_PIL:
+            sub.add_command(label="Criar personagem com foto...", command=self.criar_com_foto)
         sub.add_command(label="Abrir pasta de personagens", command=self.abrir_pasta_personagens)
         sub.add_command(label="Recarregar personagens", command=lambda: self.comando("recarregar"))
         m.add_cascade(label="Personagem", menu=sub)
@@ -724,6 +757,26 @@ class Mascote:
         self.cfg["personagem"] = nome
         salvar_config(self.cfg)
         self.aplicar_tamanho()
+
+    def criar_com_foto(self):
+        from tkinter import filedialog, messagebox, simpledialog
+        foto = filedialog.askopenfilename(parent=self.root, title="Escolha a foto do seu personagem",
+                                          filetypes=[("Fotos", "*.png *.jpg *.jpeg *.webp *.bmp"), ("Todos", "*.*")])
+        if not foto:
+            return
+        nome = simpledialog.askstring("Nome do personagem", "Como ele se chama?", parent=self.root,
+                                      initialvalue=Path(foto).stem.replace("_", " ").title())
+        if not nome:
+            return
+        try:
+            _, aviso = recorte.criar_personagem(foto, nome.strip())
+        except Exception as erro:
+            messagebox.showwarning("Mascote", str(erro), parent=self.root)
+            return
+        self.personagens = carregar_personagens()
+        self.trocar_personagem(nome.strip())
+        if aviso:
+            self.aviso(aviso)
 
     def abrir_pasta_personagens(self):
         PASTA_PERSONAGENS.mkdir(parents=True, exist_ok=True)
