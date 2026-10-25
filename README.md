@@ -12,14 +12,14 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 ## O que ele faz
 
 - Clique no mascote: abre a janela do Claude.
-- Clique no número ao lado dele: lista das conversas, com o estado de cada uma e o começo do último pedido.
+- Clique no número ao lado dele: lista das conversas, com o título, o estado de cada uma e o começo do último pedido. Clicar numa conversa abre aquela conversa no aplicativo do Claude (aba Code). Conversas do terminal abrem só o Claude.
 - Botão direito: menu com chat rápido, modo mini, seguir o cursor, personagem e sair.
-- Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço, de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
+- Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço (no Mac, Control+Option+Espaço), de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
 - Os olhos acompanham o cursor do mouse; ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
 - Aviso sonoro: um som discreto do Windows quando o Claude precisa de você ou termina (liga e desliga no menu).
-- Pousar na janela ativa: ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
+- Pousar na janela ativa (só Windows por enquanto): ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
 - Arraste para mudar de lugar; ele lembra onde ficou.
 
 ## Personagens
@@ -47,11 +47,13 @@ Para criar um de quadradinhos, peça ao Claude: "/mascote cria um personagem de 
 
 ## Instalar
 
-Precisa de Windows, Python 3 instalado e Claude Code (aplicativo Claude, aba Code, ou o terminal). Para a borboleta 3D e as bordas suaves, também do Pillow:
+Funciona no Windows e no Mac. Precisa de Python 3 e do Claude Code (aplicativo Claude, aba Code, ou o terminal). Para a borboleta 3D, os personagens de foto e as bordas suaves, também do Pillow:
 
 ```bash
 python -m pip install pillow
 ```
+
+No Mac, use `python3 -m pip install pillow`. O Python do site python.org já vem com o Tk, que desenha a janela; no Python do Homebrew, instale também com `brew install python-tk`. Na primeira vez, o Mac pode pedir permissão de Monitoramento de Entrada (Ajustes do Sistema > Privacidade e Segurança) para o mascote perceber cliques e o atalho fora da janela dele.
 
 No terminal:
 

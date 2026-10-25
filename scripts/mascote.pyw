@@ -9,7 +9,6 @@
 Com o Pillow instalado, a janela tem transparência real (bordas suaves) e
 aceita personagens em 3D. Sem ele, desenha só os personagens de quadradinhos.
 """
-import ctypes
 import json
 import math
 import os
@@ -18,11 +17,11 @@ import subprocess
 import threading
 import time
 import tkinter as tk
-import winsound
-from ctypes import wintypes
 from pathlib import Path
 
 import chat
+import plataforma
+from plataforma import FONTE_UI, abrir, clicou_agora, focar_claude, posicao_cursor
 
 try:
     from PIL import Image, ImageChops, ImageDraw, ImageFont
@@ -43,7 +42,7 @@ CONFIG = BASE / "config.json"
 PORTA = 47653
 TICK = 45  # ms entre quadros
 
-TRANSPARENTE = "#010203"
+TRANSPARENTE = "systemTransparent" if plataforma.MAC else "#010203"
 COR_ESTADO = {
     "trabalhando": "#3B82F6",
     "esperando": "#F59E0B",
@@ -62,14 +61,6 @@ PRIORIDADE = ["esperando", "bloqueado", "pronto", "trabalhando"]
 RESERVA = {"nome": "Clawd", "cores": {"X": "#D97757", "E": "#1F1F1F"}, "mapa": [
     "..XXXXXXXX..", "..XXXXXXXX..", "..XEXXXXEX..", "..XEXXXXEX..", "XXXXXXXXXXXX",
     "XXXXXXXXXXXX", "..XXXXXXXX..", "..X.X..X.X..", "..X.X..X.X.."]}
-
-user32 = ctypes.windll.user32
-gdi32 = ctypes.windll.gdi32
-try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-except Exception:
-    pass
-
 
 # ---------- utilidades ----------
 
@@ -107,42 +98,6 @@ def carregar_personagens():
                 continue
             todos[p.get("nome") or arq.stem] = p
     return todos or {"Clawd": RESERVA}
-
-
-def posicao_cursor():
-    pt = wintypes.POINT()
-    user32.GetCursorPos(ctypes.byref(pt))
-    return pt.x, pt.y
-
-
-def clicou_agora():
-    return bool(user32.GetAsyncKeyState(0x01) & 0x8001)
-
-
-def focar_claude():
-    """Traz a janela do Claude para a frente. Devolve False se não achou."""
-    achadas = []
-    PROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
-
-    def cb(hwnd, _):
-        if user32.IsWindowVisible(hwnd):
-            n = user32.GetWindowTextLengthW(hwnd)
-            buf = ctypes.create_unicode_buffer(n + 1)
-            user32.GetWindowTextW(hwnd, buf, n + 1)
-            if buf.value == "Claude":
-                achadas.append(hwnd)
-        return True
-
-    user32.EnumWindows(PROC(cb), 0)
-    if not achadas:
-        return False
-    hwnd = achadas[0]
-    if user32.IsIconic(hwnd):
-        user32.ShowWindow(hwnd, 9)
-    user32.keybd_event(0x12, 0, 0, 0)  # Alt: libera o Windows a trocar o foco
-    user32.keybd_event(0x12, 0, 2, 0)
-    user32.SetForegroundWindow(hwnd)
-    return True
 
 
 def ha_quanto(ts):
@@ -214,7 +169,9 @@ class Mascote:
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
         self.root.config(bg=TRANSPARENTE)
-        if not TEM_PIL:
+        if plataforma.MAC:
+            self.root.attributes("-transparent", True)
+        elif not TEM_PIL:
             self.root.wm_attributes("-transparentcolor", TRANSPARENTE)
 
         self.canvas = tk.Canvas(self.root, bg=TRANSPARENTE, highlightthickness=0, cursor="hand2")
@@ -228,11 +185,12 @@ class Mascote:
         x = self.cfg.get("x", self.root.winfo_screenwidth() - self.largura - 40)
         y = self.cfg.get("y", self.root.winfo_screenheight() - self.altura - 80)
         self.root.geometry(f"+{x}+{y}")
-        self.camada = Camada(self.root) if TEM_PIL else None
+        self.camada = Camada(self.root, self.canvas) if TEM_PIL else None
+        plataforma.registrar_root(self.root)
         if TEM_PIL:
-            dpi = self.root.winfo_fpixels("1i")
-            self.fonte = self.carregar_fonte(["segoeuib.ttf", "arialbd.ttf"], round(10 * dpi / 72))
-            self.fonte_mini = self.carregar_fonte(["segoeuib.ttf", "arialbd.ttf"], round(8.5 * dpi / 72))
+            esc = plataforma.escala(self.root)
+            self.fonte = self.carregar_fonte(plataforma.fontes_pil(), round(13.3 * esc))
+            self.fonte_mini = self.carregar_fonte(plataforma.fontes_pil(), round(11.3 * esc))
 
         threading.Thread(target=self.escutar, daemon=True).start()
         self.atualizar_estado()
@@ -242,7 +200,7 @@ class Mascote:
     def carregar_fonte(nomes, tam):
         for n in nomes:
             try:
-                return ImageFont.truetype(str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / n), tam)
+                return ImageFont.truetype(n, tam)
             except OSError:
                 continue
         return ImageFont.load_default()
@@ -308,7 +266,7 @@ class Mascote:
         novo = next((e for e in PRIORIDADE if e in estados), "ocioso")
         if (self.iniciado and novo != self.estado and novo in ("esperando", "pronto")
                 and self.cfg.get("som", True)):
-            winsound.MessageBeep(0x40 if novo == "esperando" else 0)  # som do sistema, discreto
+            plataforma.tocar_som(novo)
         self.estado = novo
         self.iniciado = True
         if self.bandeja:
@@ -370,8 +328,8 @@ class Mascote:
                 self.posicionar_janelas()
 
     def ver_atalho(self):
-        """Ctrl+Alt+Espaço abre e fecha o chat rápido, de qualquer programa."""
-        apertado = all(user32.GetAsyncKeyState(k) & 0x8000 for k in (0x11, 0x12, 0x20))
+        """Ctrl+Alt+Espaço (Mac: Control+Option+Espaço) abre e fecha o chat rápido, de qualquer programa."""
+        apertado = plataforma.atalho_apertado()
         if apertado and not self.atalho_antes:
             self.alternar_chat()
         self.atalho_antes = apertado
@@ -396,26 +354,16 @@ class Mascote:
     def borda_da_janela_ativa(self):
         padrao = (self.cfg.get("x", self.root.winfo_screenwidth() - self.largura - 40),
                   self.cfg.get("y", self.root.winfo_screenheight() - self.altura - 80))
-        hwnd = user32.GetForegroundWindow()
-        if not hwnd:
-            return padrao
-        pid = wintypes.DWORD()
-        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-        if pid.value == os.getpid():
+        r = plataforma.janela_ativa()
+        if r == "proprio":
             return self.alvo_pouso or padrao  # é uma janela do próprio mascote
-        nome = ctypes.create_unicode_buffer(64)
-        user32.GetClassNameW(hwnd, nome, 64)
-        if nome.value in ("Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd"):
+        if not r:
             return padrao
-        if user32.IsZoomed(hwnd) or user32.IsIconic(hwnd):
-            return padrao
-        r = wintypes.RECT()
-        if ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(hwnd), 9, ctypes.byref(r), ctypes.sizeof(r)):
-            user32.GetWindowRect(hwnd, ctypes.byref(r))
+        esq, topo, dir_ = r
         pes = self.altura - (8 if self.cfg.get("mini") else 16)
-        x = max(r.left, r.right - self.largura - 60)
-        y = r.top - pes
-        if y < 0 or r.right - r.left < self.largura:
+        x = max(esq, dir_ - self.largura - 60)
+        y = topo - pes
+        if y < 0 or dir_ - esq < self.largura:
             return padrao
         return x, y
 
@@ -680,11 +628,11 @@ class Mascote:
             bx = min(meio + colunas * px / 2 + (2 if mini else 6), self.largura - r - 2)
             by = max(topo + 2, r + 2)
             c.create_oval(bx - r, by - r, bx + r, by + r, fill=COR_ESTADO[e], outline="white", width=2)
-            c.create_text(bx, by, text=str(n), fill="white", font=("Segoe UI", 8 if mini else 9, "bold"))
+            c.create_text(bx, by, text=str(n), fill="white", font=(FONTE_UI, 8 if mini else 9, "bold"))
             self.area_numero = (bx - r, by - r, bx + r, by + r)
         texto = self.texto_balao()
         if texto:
-            t = c.create_text(meio, topo - 30, text=texto, font=("Segoe UI", 10, "bold"), fill="#1F1F1F")
+            t = c.create_text(meio, topo - 30, text=texto, font=(FONTE_UI, 10, "bold"), fill="#1F1F1F")
             x0, y0, x1, y1 = c.bbox(t)
             c.create_rectangle(x0 - 10, y0 - 5, x1 + 10, y1 + 5, fill="white", outline=COR_ESTADO[e], width=2)
             c.tag_raise(t)
@@ -716,6 +664,15 @@ class Mascote:
             return
         self.abrir_claude()
 
+    def abrir_conversa(self, s):
+        """Abre aquela conversa no aplicativo do Claude; se não der, abre o Claude."""
+        self.vistos[s["sessao"]] = s.get("quando")
+        if plataforma.abrir_sessao(s["sessao"]):
+            if self.bandeja:
+                self.alternar_bandeja()
+        else:
+            self.abrir_claude()
+
     def abrir_claude(self):
         self.marcar_vistos()
         if not focar_claude():
@@ -725,7 +682,7 @@ class Mascote:
         m = tk.Menu(self.root, tearoff=0)
         m.add_command(label="Abrir o Claude", command=self.abrir_claude)
         m.add_command(label="Conversas", command=self.alternar_bandeja)
-        m.add_command(label="Chat rápido    Ctrl+Alt+Espaço", command=self.alternar_chat)
+        m.add_command(label="Chat rápido    " + plataforma.ATALHO_TEXTO, command=self.alternar_chat)
         m.add_separator()
         self._v_mini = tk.BooleanVar(value=bool(self.cfg.get("mini")))
         self._v_seguir = tk.BooleanVar(value=bool(self.cfg.get("seguir")))
@@ -739,8 +696,9 @@ class Mascote:
         self._v_som = tk.BooleanVar(value=bool(self.cfg.get("som", True)))
         self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
         m.add_checkbutton(label="Aviso sonoro", variable=self._v_som, command=lambda: self.alternar("som", True))
-        m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
-                          command=lambda: self.alternar("pousar", False))
+        if plataforma.POUSO_DISPONIVEL:
+            m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
+                              command=lambda: self.alternar("pousar", False))
         sub = tk.Menu(m, tearoff=0)
         for nome in self.personagens:
             sub.add_radiobutton(label=nome, value=nome, variable=self._v_pers,
@@ -797,7 +755,7 @@ class Mascote:
         if not exemplo.exists():
             exemplo.write_text(json.dumps({**RESERVA, "nome": "Meu personagem"}, ensure_ascii=False, indent=2),
                                encoding="utf-8")
-        os.startfile(PASTA_PERSONAGENS)
+        abrir(PASTA_PERSONAGENS)
 
     # --- janelas auxiliares ---
     def posicionar_janelas(self):
@@ -823,8 +781,8 @@ class Mascote:
     def cabecalho(self, caixa, titulo, fechar):
         topo = tk.Frame(caixa, bg="white")
         topo.pack(fill="x")
-        tk.Label(topo, text=titulo, bg="white", font=("Segoe UI", 11, "bold")).pack(side="left")
-        x = tk.Label(topo, text="Fechar", bg="white", fg="#6B7280", cursor="hand2", font=("Segoe UI", 9))
+        tk.Label(topo, text=titulo, bg="white", font=(FONTE_UI, 11, "bold")).pack(side="left")
+        x = tk.Label(topo, text="Fechar", bg="white", fg="#6B7280", cursor="hand2", font=(FONTE_UI, 9))
         x.pack(side="right")
         x.bind("<Button-1>", lambda _: fechar())
 
@@ -845,33 +803,36 @@ class Mascote:
         self.cabecalho(caixa, "Conversas", self.alternar_bandeja)
         if not self.sessoes:
             tk.Label(caixa, text="Nenhuma conversa nas últimas 12 horas.", bg="white", fg="#6B7280",
-                     font=("Segoe UI", 9)).pack(anchor="w", pady=(8, 0))
+                     font=(FONTE_UI, 9)).pack(anchor="w", pady=(8, 0))
         for s in self.sessoes[:8]:
             e = s.get("estado", "ocioso")
             visto = e in ("pronto", "bloqueado") and self.vistos.get(s["sessao"]) == s.get("quando")
             linha = tk.Frame(caixa, bg="white", cursor="hand2", pady=6)
             linha.pack(fill="x")
             tk.Label(linha, text="\u25CF", fg=COR_ESTADO["ocioso" if visto else e], bg="white",
-                     font=("Segoe UI", 11)).pack(side="left", anchor="n")
+                     font=(FONTE_UI, 11)).pack(side="left", anchor="n")
             txt = tk.Frame(linha, bg="white")
             txt.pack(side="left", fill="x", padx=(6, 0))
-            nome = Path(s.get("pasta") or "").name or "Conversa"
-            tk.Label(txt, text=nome, bg="white", font=("Segoe UI", 9, "bold"), anchor="w").pack(fill="x")
+            info = plataforma.sessoes_do_app().get(s["sessao"], {})
+            nome = info.get("titulo") or Path(s.get("pasta") or "").name or "Conversa"
+            tk.Label(txt, text=nome, bg="white", font=(FONTE_UI, 9, "bold"), anchor="w").pack(fill="x")
             pedido = s.get("aviso") if e == "esperando" and s.get("aviso") else s.get("pedido")
+            if pedido and pedido.startswith("<"):
+                pedido = ""
             if pedido:
                 tk.Label(txt, text=pedido[:60] + ("..." if len(pedido) > 60 else ""), bg="white",
-                         fg="#374151", font=("Segoe UI", 9), anchor="w", justify="left").pack(fill="x")
+                         fg="#374151", font=(FONTE_UI, 9), anchor="w", justify="left").pack(fill="x")
             tk.Label(txt, text=f"{TEXTO_ESTADO.get(e) or 'Parada'} · {ha_quanto(s.get('quando', 0))}",
-                     bg="white", fg="#6B7280", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+                     bg="white", fg="#6B7280", font=(FONTE_UI, 8), anchor="w").pack(fill="x")
             for w in [linha] + list(linha.winfo_children()) + list(txt.winfo_children()):
-                w.bind("<Button-1>", lambda _: self.abrir_claude())
+                w.bind("<Button-1>", lambda _, sessao=s: self.abrir_conversa(sessao))
         b.update_idletasks()
         self.posicionar_janelas()
 
     # --- chat rápido ---
     def garantir_chat(self):
         if not self.chat_obj:
-            self.chat_obj = chat.ChatRapido(self.root, self.root.winfo_fpixels("1i") / 96,
+            self.chat_obj = chat.ChatRapido(self.root, plataforma.escala(self.root),
                                             ao_comecar=lambda: setattr(self, "chat_rodando", True),
                                             ao_terminar=lambda: setattr(self, "chat_rodando", False))
             self.posicionar_chat()
@@ -910,7 +871,7 @@ class Mascote:
 
     def aviso(self, texto):
         j = self.nova_janela()
-        tk.Label(j, text=texto, bg="white", padx=12, pady=8, font=("Segoe UI", 9)).pack(padx=1, pady=1)
+        tk.Label(j, text=texto, bg="white", padx=12, pady=8, font=(FONTE_UI, 9)).pack(padx=1, pady=1)
         j.update_idletasks()
         j.geometry(f"+{self.root.winfo_x()}+{max(0, self.root.winfo_y() - j.winfo_reqheight() - 4)}")
         j.after(2500, j.destroy)

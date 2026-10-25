@@ -58,7 +58,9 @@ def main():
         "quando": time.time(),
     }
     if evento == "UserPromptSubmit":
-        registro["pedido"] = " ".join((dados.get("prompt") or "").split())[:120]
+        pedido = " ".join((dados.get("prompt") or "").split())
+        if pedido and not pedido.startswith("<"):  # avisos automáticos do sistema não são pedido da pessoa
+            registro["pedido"] = pedido[:120]
     if evento == "Notification":
         registro["aviso"] = (dados.get("message") or "")[:160]
 

@@ -42,11 +42,15 @@ def ligar():
         print("O mascote já está ligado.")
         return
     exe = Path(sys.executable)
-    pythonw = exe.with_name("pythonw.exe")
-    exe = pythonw if pythonw.exists() else exe
-    subprocess.Popen([str(exe), str(AQUI / "mascote.pyw")], cwd=str(AQUI),
-                     creationflags=0x00000008 | 0x00000200,  # sem console, processo à parte
-                     close_fds=True)
+    if sys.platform == "win32":
+        pythonw = exe.with_name("pythonw.exe")
+        exe = pythonw if pythonw.exists() else exe
+        subprocess.Popen([str(exe), str(AQUI / "mascote.pyw")], cwd=str(AQUI),
+                         creationflags=0x00000008 | 0x00000200,  # sem console, processo à parte
+                         close_fds=True)
+    else:
+        subprocess.Popen([str(exe), str(AQUI / "mascote.pyw")], cwd=str(AQUI), start_new_session=True,
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print("Mascote ligado.")
 
 

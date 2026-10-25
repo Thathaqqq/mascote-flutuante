@@ -15,6 +15,9 @@ import threading
 import tkinter as tk
 from pathlib import Path
 
+import plataforma
+from plataforma import FONTE_UI, FONTE_UI_FORTE
+
 try:
     from PIL import Image, ImageDraw, ImageFilter
     from camada import Camada
@@ -22,7 +25,7 @@ try:
 except Exception:
     TEM_PIL = False
 
-CHAVE = "#010203"  # cor que vira transparente nos cantos do cartão
+CHAVE = "systemTransparent" if plataforma.MAC else "#010203"  # cor que vira transparente nos cantos
 COR = {
     "cartao": "#FFFFFF",
     "borda": "#E3E6EA",
@@ -55,6 +58,13 @@ def _redondo(c, x0, y0, x1, y1, r, **kw):
     return c.create_polygon(pts, smooth=True, **kw)
 
 
+def _transparente(janela):
+    if plataforma.MAC:
+        janela.attributes("-transparent", True)
+    else:
+        janela.wm_attributes("-transparentcolor", CHAVE)
+
+
 def _maozinha(c, item):
     c.tag_bind(item, "<Enter>", lambda e: c.config(cursor="hand2"))
     c.tag_bind(item, "<Leave>", lambda e: c.config(cursor=""))
@@ -82,9 +92,9 @@ class Barra:
         self.cv.bind("<Motion>", self._mover)
         if TEM_PIL:
             self.fundo.geometry(f"{self.W}x{self.H}")
-            self.camada = Camada(self.fundo)
+            self.camada = Camada(self.fundo, self.cv)
         else:
-            self.fundo.wm_attributes("-transparentcolor", CHAVE)
+            _transparente(self.fundo)
             self.camada = None
 
         # campo de texto numa janelinha branca por cima da barra
@@ -92,7 +102,7 @@ class Barra:
         self.jcampo.overrideredirect(True)
         self.jcampo.attributes("-topmost", True)
         self.jcampo.config(bg="white")
-        self.campo = tk.Entry(self.jcampo, font=("Segoe UI", 11), relief="flat", bd=0, bg="white",
+        self.campo = tk.Entry(self.jcampo, font=(FONTE_UI, 11), relief="flat", bd=0, bg="white",
                               fg=COR["dica"], insertbackground=COR["titulo"], highlightthickness=0)
         self.campo.pack(fill="both", expand=True)
         self.campo.insert(0, self.dica)
@@ -144,10 +154,10 @@ class Barra:
             _redondo(c, pad, pad, pad + Wp, pad + Hp, Hp / 2, fill="white", outline=COR["borda"])
             cy = pad + Hp / 2
             c.create_oval(pad + 9 * s, cy - 16 * s, pad + 41 * s, cy + 16 * s, fill=COR["mais"], outline="")
-            c.create_text(pad + 25 * s, cy, text="+", font=("Segoe UI", 14), fill="#3C4043")
+            c.create_text(pad + 25 * s, cy, text="+", font=(FONTE_UI, 14), fill="#3C4043")
             cor = "#%02x%02x%02x" % cor_env
             c.create_oval(pad + Wp - 41 * s, cy - 16 * s, pad + Wp - 9 * s, cy + 16 * s, fill=cor, outline="")
-            c.create_text(pad + Wp - 25 * s, cy, text="↑", font=("Segoe UI Semibold", 13), fill="white")
+            c.create_text(pad + Wp - 25 * s, cy, text="↑", font=(FONTE_UI_FORTE, 13), fill="white")
 
     def _mostrar_img(self):
         if self.camada and self.visivel:
@@ -271,14 +281,14 @@ class Cartao:
         self.j.overrideredirect(True)
         self.j.attributes("-topmost", True)
         self.j.config(bg=CHAVE)
-        self.j.wm_attributes("-transparentcolor", CHAVE)
+        _transparente(self.j)
         self.c = tk.Canvas(self.j, width=self.W, height=self.H, bg=CHAVE, highlightthickness=0)
         self.c.pack()
         self.conv = tk.Canvas(self.j, bg=COR["cartao"], highlightthickness=0, bd=0)
         self.conv.bind("<MouseWheel>", lambda e: self.conv.yview_scroll(int(-e.delta / 120) * 3, "units"))
         self.c.bind("<MouseWheel>", lambda e: self.conv.yview_scroll(int(-e.delta / 120) * 3, "units"))
-        self.f_texto = ("Segoe UI", 10)
-        self.f_peq = ("Segoe UI", 8)
+        self.f_texto = (FONTE_UI, 10)
+        self.f_peq = (FONTE_UI, 8)
         self.visivel = False
         self.j.withdraw()
 
@@ -288,9 +298,9 @@ class Cartao:
         c.config(width=W, height=H)
         _redondo(c, 3, 5, W - 1, H - 1, 18 * s, fill=COR["sombra"], outline="")
         _redondo(c, 1, 1, W - 3, H - 4, 18 * s, fill=COR["cartao"], outline=COR["borda"])
-        c.create_text(18 * s, 20 * s, text="Chat rápido", anchor="w", font=("Segoe UI Semibold", 10),
+        c.create_text(18 * s, 20 * s, text="Chat rápido", anchor="w", font=(FONTE_UI_FORTE, 10),
                       fill=COR["titulo"])
-        x = c.create_text(W - 18 * s, 19 * s, text="✕", anchor="e", font=("Segoe UI", 10), fill=COR["apoio"])
+        x = c.create_text(W - 18 * s, 19 * s, text="✕", anchor="e", font=(FONTE_UI, 10), fill=COR["apoio"])
         c.tag_bind(x, "<Button-1>", lambda e: self.ao_fechar())
         _maozinha(c, x)
         c.create_window(int(12 * s), int(36 * s), window=self.conv, anchor="nw",
@@ -426,7 +436,7 @@ class ChatRapido:
                 cmd += ["--resume", self.sessao]
             try:
                 r = subprocess.run(cmd, cwd=str(Path.home()), env=env, capture_output=True, text=True,
-                                   encoding="utf-8", timeout=300, creationflags=0x08000000)
+                                   encoding="utf-8", timeout=300, **plataforma.sem_janela())
                 try:
                     dados = json.loads(r.stdout)
                     saida, sessao = dados.get("result") or "Sem resposta.", dados.get("session_id")

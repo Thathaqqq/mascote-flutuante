@@ -5,9 +5,9 @@ description: Liga, desliga e configura o mascote flutuante do Claude (personagem
 
 # Mascote do Claude
 
-O mascote é uma janelinha que fica por cima das outras e mostra o que o Claude está fazendo. Os scripts estão em `${CLAUDE_PLUGIN_ROOT}/scripts`. Funciona no Windows com Python 3 instalado.
+O mascote é uma janelinha que fica por cima das outras e mostra o que o Claude está fazendo. Os scripts estão em `${CLAUDE_PLUGIN_ROOT}/scripts`. Funciona no Windows e no Mac com Python 3 instalado.
 
-Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py" ...`.
+Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py" ...` (no Mac, `python3`).
 
 ## O que a pessoa pode pedir
 
