@@ -19,6 +19,8 @@ Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py"
 | Modo mini | `iniciar.py config mini sim` (ou `nao`) |
 | Seguir o cursor | `iniciar.py config seguir sim` (ou `nao`) |
 | Abrir junto com o Claude | `iniciar.py config automatico sim` (ou `nao`) |
+| Aviso sonoro | `iniciar.py config som sim` (ou `nao`) |
+| Pousar na janela ativa | `iniciar.py config pousar sim` (ou `nao`) |
 
 Personagens prontos: Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `${CLAUDE_PLUGIN_ROOT}/personagens`).
 
@@ -91,6 +93,6 @@ Regras do desenho:
 
 - Balão e cor: azul trabalhando, amarelo precisa de você, verde pronto para revisar, vermelho algo travou.
 - Clique no mascote: abre o Claude. Clique no número: lista de conversas. Botão direito: menu.
-- Chat rápido: pergunta curta respondida ali mesmo, sem abrir o Claude (usa o comando `claude` do Claude Code).
+- Chat rápido: barra embaixo do mascote, aparece com o mouse em cima ou Ctrl+Alt+Espaço; respostas em balões, conversa continua (usa o comando `claude` do Claude Code).
 - Os olhos seguem o cursor, ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
 - O estado vem dos ganchos do plugin, gravados em `~/.claude/mascote/estado`. Só guarda o começo do último pedido de cada conversa, no próprio computador.

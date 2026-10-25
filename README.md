@@ -14,10 +14,12 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 - Clique no mascote: abre a janela do Claude.
 - Clique no número ao lado dele: lista das conversas, com o estado de cada uma e o começo do último pedido.
 - Botão direito: menu com chat rápido, modo mini, seguir o cursor, personagem e sair.
-- Chat rápido: uma caixinha para perguntas curtas, respondidas ali mesmo, sem abrir o Claude.
+- Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço, de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
 - Os olhos acompanham o cursor do mouse; ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
+- Aviso sonoro: um som discreto do Windows quando o Claude precisa de você ou termina (liga e desliga no menu).
+- Pousar na janela ativa: ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
 - Arraste para mudar de lugar; ele lembra onde ficou.
 
 ## Personagens
@@ -33,6 +35,7 @@ A Borboleta IBA usa a foto da morpho-azul do logo do Instituto Borboleta Azul, c
 | Passa por cima | Abre bem as asas, com brilho |
 | Muda de lado | Vira o corpo e as antenas para o cursor |
 | Chega muito rápido | Se assusta e bate as asas forte |
+| Asa vira de costas | Mostra o lado de baixo, marrom, como na morpho de verdade |
 | Clica em qualquer lugar | Dá uma agitada |
 | "Seguir o cursor" ligado | Voa atrás do mouse, inclinando nas curvas |
 
@@ -70,6 +73,8 @@ Pelo menu do botão direito ou pedindo ao Claude com `/mascote`:
 - modo mini
 - seguir o cursor
 - abrir junto com o Claude (liga e desliga o início automático)
+- aviso sonoro
+- pousar na janela ativa
 - desligar
 
 ## Privacidade

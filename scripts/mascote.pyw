@@ -18,12 +18,16 @@ import subprocess
 import threading
 import time
 import tkinter as tk
+import winsound
 from ctypes import wintypes
 from pathlib import Path
+
+import chat
 
 try:
     from PIL import Image, ImageChops, ImageDraw, ImageFont
     import borboleta3d
+    from camada import Camada
     import foto3d
     import recorte
     TEM_PIL = True
@@ -168,69 +172,6 @@ def cor_rgb(hexa):
     return tuple(int(hexa[i:i + 2], 16) for i in (1, 3, 5))
 
 
-# ---------- janela com transparência real (Windows) ----------
-
-class _BIH(ctypes.Structure):
-    _fields_ = [("biSize", wintypes.DWORD), ("biWidth", wintypes.LONG), ("biHeight", wintypes.LONG),
-                ("biPlanes", wintypes.WORD), ("biBitCount", wintypes.WORD), ("biCompression", wintypes.DWORD),
-                ("biSizeImage", wintypes.DWORD), ("biXPelsPerMeter", wintypes.LONG),
-                ("biYPelsPerMeter", wintypes.LONG), ("biClrUsed", wintypes.DWORD), ("biClrImportant", wintypes.DWORD)]
-
-
-class _BLEND(ctypes.Structure):
-    _fields_ = [("BlendOp", ctypes.c_ubyte), ("BlendFlags", ctypes.c_ubyte),
-                ("SourceConstantAlpha", ctypes.c_ubyte), ("AlphaFormat", ctypes.c_ubyte)]
-
-
-user32.GetDC.restype = wintypes.HDC
-user32.GetDC.argtypes = [wintypes.HWND]
-user32.ReleaseDC.argtypes = [wintypes.HWND, wintypes.HDC]
-user32.UpdateLayeredWindow.argtypes = [wintypes.HWND, wintypes.HDC, ctypes.POINTER(wintypes.POINT),
-                                       ctypes.POINTER(wintypes.SIZE), wintypes.HDC, ctypes.POINTER(wintypes.POINT),
-                                       wintypes.COLORREF, ctypes.POINTER(_BLEND), wintypes.DWORD]
-user32.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
-user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, wintypes.LONG]
-gdi32.CreateCompatibleDC.restype = wintypes.HDC
-gdi32.CreateCompatibleDC.argtypes = [wintypes.HDC]
-gdi32.CreateDIBSection.restype = wintypes.HBITMAP
-gdi32.CreateDIBSection.argtypes = [wintypes.HDC, ctypes.c_void_p, wintypes.UINT,
-                                   ctypes.POINTER(ctypes.c_void_p), wintypes.HANDLE, wintypes.DWORD]
-gdi32.SelectObject.restype = wintypes.HGDIOBJ
-gdi32.SelectObject.argtypes = [wintypes.HDC, wintypes.HGDIOBJ]
-gdi32.DeleteObject.argtypes = [wintypes.HGDIOBJ]
-gdi32.DeleteDC.argtypes = [wintypes.HDC]
-
-
-class Camada:
-    """Mostra uma imagem RGBA como janela, com cada pixel na sua transparência."""
-
-    def __init__(self, root):
-        root.update_idletasks()
-        self.hwnd = int(root.wm_frame(), 16)
-        ex = user32.GetWindowLongW(self.hwnd, -20)
-        user32.SetWindowLongW(self.hwnd, -20, ex | 0x80000)  # WS_EX_LAYERED
-
-    def mostrar(self, img, x, y):
-        w, h = img.size
-        a = img.getchannel("A")
-        r, g, b = (ImageChops.multiply(c, a) for c in img.split()[:3])
-        dados = Image.merge("RGBA", (b, g, r, a)).tobytes()
-        tela = user32.GetDC(None)
-        mdc = gdi32.CreateCompatibleDC(tela)
-        bih = _BIH(ctypes.sizeof(_BIH), w, -h, 1, 32, 0, 0, 0, 0, 0, 0)
-        bits = ctypes.c_void_p()
-        bmp = gdi32.CreateDIBSection(mdc, ctypes.byref(bih), 0, ctypes.byref(bits), None, 0)
-        ctypes.memmove(bits, dados, len(dados))
-        antigo = gdi32.SelectObject(mdc, bmp)
-        user32.UpdateLayeredWindow(self.hwnd, tela, ctypes.byref(wintypes.POINT(x, y)),
-                                   ctypes.byref(wintypes.SIZE(w, h)), mdc, ctypes.byref(wintypes.POINT(0, 0)),
-                                   0, ctypes.byref(_BLEND(0, 0, 255, 1)), 2)
-        gdi32.SelectObject(mdc, antigo)
-        gdi32.DeleteObject(bmp)
-        gdi32.DeleteDC(mdc)
-        user32.ReleaseDC(None, tela)
-
-
 # ---------- janela principal ----------
 
 class Mascote:
@@ -257,6 +198,11 @@ class Mascote:
         self.area_numero = None
         self.bandeja = None
         self.chat = None
+        self.chat_obj = None
+        self.chat_fora_desde = None
+        self.iniciado = False
+        self.atalho_antes = False
+        self.alvo_pouso = None
         self.chat_rodando = False
         self.borboletas = {}
         self.voo = borboleta3d.Voo() if TEM_PIL else None
@@ -359,7 +305,12 @@ class Mascote:
             estados.add(e)
         if self.chat_rodando:
             estados.add("trabalhando")
-        self.estado = next((e for e in PRIORIDADE if e in estados), "ocioso")
+        novo = next((e for e in PRIORIDADE if e in estados), "ocioso")
+        if (self.iniciado and novo != self.estado and novo in ("esperando", "pronto")
+                and self.cfg.get("som", True)):
+            winsound.MessageBeep(0x40 if novo == "esperando" else 0)  # som do sistema, discreto
+        self.estado = novo
+        self.iniciado = True
         if self.bandeja:
             self.preencher_bandeja()
         self.root.after(1000, self.atualizar_estado)
@@ -418,6 +369,56 @@ class Mascote:
                 self.virado = 1 if dx > 0 else -1
                 self.posicionar_janelas()
 
+    def ver_atalho(self):
+        """Ctrl+Alt+Espaço abre e fecha o chat rápido, de qualquer programa."""
+        apertado = all(user32.GetAsyncKeyState(k) & 0x8000 for k in (0x11, 0x12, 0x20))
+        if apertado and not self.atalho_antes:
+            self.alternar_chat()
+        self.atalho_antes = apertado
+
+    def pousar_na_janela(self):
+        """Senta na borda de cima da janela que a pessoa está usando."""
+        if not self.cfg.get("pousar") or self.cfg.get("seguir") or self.arraste:
+            return
+        if self.quadro % 6 == 0:
+            self.alvo_pouso = self.borda_da_janela_ativa()
+        if not self.alvo_pouso:
+            return
+        wx, wy = self.root.winfo_x(), self.root.winfo_y()
+        ax, ay = self.alvo_pouso
+        if abs(ax - wx) + abs(ay - wy) > 2:
+            nx, ny = int(wx + (ax - wx) * 0.25), int(wy + (ay - wy) * 0.25)
+            if abs(ax - nx) + abs(ay - ny) <= 2:
+                nx, ny = ax, ay
+            self.root.geometry(f"+{nx}+{ny}")
+            self.posicionar_janelas()
+
+    def borda_da_janela_ativa(self):
+        padrao = (self.cfg.get("x", self.root.winfo_screenwidth() - self.largura - 40),
+                  self.cfg.get("y", self.root.winfo_screenheight() - self.altura - 80))
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return padrao
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        if pid.value == os.getpid():
+            return self.alvo_pouso or padrao  # é uma janela do próprio mascote
+        nome = ctypes.create_unicode_buffer(64)
+        user32.GetClassNameW(hwnd, nome, 64)
+        if nome.value in ("Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd"):
+            return padrao
+        if user32.IsZoomed(hwnd) or user32.IsIconic(hwnd):
+            return padrao
+        r = wintypes.RECT()
+        if ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(hwnd), 9, ctypes.byref(r), ctypes.sizeof(r)):
+            user32.GetWindowRect(hwnd, ctypes.byref(r))
+        pes = self.altura - (8 if self.cfg.get("mini") else 16)
+        x = max(r.left, r.right - self.largura - 60)
+        y = r.top - pes
+        if y < 0 or r.right - r.left < self.largura:
+            return padrao
+        return x, y
+
     # --- desenho ---
     def animar(self):
         agora = time.time()
@@ -430,6 +431,13 @@ class Mascote:
             self.acompanhar_cursor(dt)
         except Exception:
             self.cursor_dentro, self.dir_olhar = False, (0, 0)
+        try:
+            if self.quadro % 3 == 0:
+                self.cuidar_do_chat()
+            self.ver_atalho()
+            self.pousar_na_janela()
+        except Exception:
+            pass
         if TEM_PIL:
             self.desenhar_imagem(dt)
         else:
@@ -717,7 +725,7 @@ class Mascote:
         m = tk.Menu(self.root, tearoff=0)
         m.add_command(label="Abrir o Claude", command=self.abrir_claude)
         m.add_command(label="Conversas", command=self.alternar_bandeja)
-        m.add_command(label="Chat rápido", command=self.alternar_chat)
+        m.add_command(label="Chat rápido    Ctrl+Alt+Espaço", command=self.alternar_chat)
         m.add_separator()
         self._v_mini = tk.BooleanVar(value=bool(self.cfg.get("mini")))
         self._v_seguir = tk.BooleanVar(value=bool(self.cfg.get("seguir")))
@@ -728,6 +736,11 @@ class Mascote:
                           command=lambda: self.alternar("seguir", False))
         m.add_checkbutton(label="Abrir junto com o Claude", variable=self._v_auto,
                           command=lambda: self.alternar("automatico", True))
+        self._v_som = tk.BooleanVar(value=bool(self.cfg.get("som", True)))
+        self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
+        m.add_checkbutton(label="Aviso sonoro", variable=self._v_som, command=lambda: self.alternar("som", True))
+        m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
+                          command=lambda: self.alternar("pousar", False))
         sub = tk.Menu(m, tearoff=0)
         for nome in self.personagens:
             sub.add_radiobutton(label=nome, value=nome, variable=self._v_pers,
@@ -789,7 +802,8 @@ class Mascote:
     # --- janelas auxiliares ---
     def posicionar_janelas(self):
         x, y = self.root.winfo_x(), self.root.winfo_y()
-        for jan in (self.bandeja, self.chat):
+        self.posicionar_chat()
+        for jan in (self.bandeja,):
             if jan:
                 w, h = jan.winfo_reqwidth(), jan.winfo_reqheight()
                 jx = min(max(0, x + self.largura - w), self.root.winfo_screenwidth() - w)
@@ -855,70 +869,44 @@ class Mascote:
         self.posicionar_janelas()
 
     # --- chat rápido ---
+    def garantir_chat(self):
+        if not self.chat_obj:
+            self.chat_obj = chat.ChatRapido(self.root, self.root.winfo_fpixels("1i") / 96,
+                                            ao_comecar=lambda: setattr(self, "chat_rodando", True),
+                                            ao_terminar=lambda: setattr(self, "chat_rodando", False))
+            self.posicionar_chat()
+        return self.chat_obj
+
     def alternar_chat(self):
-        if self.chat:
-            self.chat.destroy()
-            self.chat = None
-            return
-        self.chat = self.nova_janela()
-        caixa = tk.Frame(self.chat, bg="white", padx=10, pady=10)
-        caixa.pack(padx=1, pady=1)
-        self.cabecalho(caixa, "Chat rápido", self.alternar_chat)
-        self.entrada = tk.Entry(caixa, width=42, font=("Segoe UI", 10), relief="solid", bd=1)
-        self.entrada.pack(fill="x", pady=(8, 6), ipady=4)
-        self.entrada.bind("<Return>", self.enviar_chat)
-        self.resposta = tk.Text(caixa, width=42, height=8, wrap="word", font=("Segoe UI", 9),
-                                relief="flat", bg="#F7F7F7")
-        self.resposta.pack(fill="both")
-        self.resposta.insert("1.0", "Escreva e aperte Enter.")
-        self.resposta.config(state="disabled")
-        copiar = tk.Label(caixa, text="Copiar resposta", bg="white", fg="#3B6FD9", cursor="hand2",
-                          font=("Segoe UI", 9))
-        copiar.pack(anchor="e", pady=(6, 0))
-        copiar.bind("<Button-1>", lambda _: self.copiar_resposta())
-        self.chat.update_idletasks()
-        self.posicionar_janelas()
-        self.chat.after(50, lambda: self.chat and (self.chat.focus_force(), self.entrada.focus_set()))
+        c = self.garantir_chat()
+        if c.aberto:
+            c.fechar()
+        else:
+            self.posicionar_chat()
+            c.abrir(focar=True)
+            self.chat_fora_desde = None
 
-    def escrever_resposta(self, texto):
-        if not self.chat:
-            return
-        self.resposta.config(state="normal")
-        self.resposta.delete("1.0", "end")
-        self.resposta.insert("1.0", texto)
-        self.resposta.config(state="disabled")
+    def posicionar_chat(self):
+        if self.chat_obj:
+            x, y = self.root.winfo_x(), self.root.winfo_y()
+            pes = self.altura - (8 if self.cfg.get("mini") else 16)
+            self.chat_obj.posicionar(x + self.largura / 2, y + 10, y + pes)
 
-    def copiar_resposta(self):
-        self.root.clipboard_clear()
-        self.root.clipboard_append(self.resposta.get("1.0", "end").strip())
-
-    def enviar_chat(self, _=None):
-        pergunta = self.entrada.get().strip()
-        if not pergunta or self.chat_rodando:
-            return
-        self.chat_rodando = True
-        self.escrever_resposta("Pensando...")
-
-        def rodar():
-            env = dict(os.environ, MASCOTE_INTERNO="1")
-            try:
-                r = subprocess.run(["claude", "-p", pergunta, "--output-format", "text"],
-                                   cwd=str(Path.home()), env=env, capture_output=True, text=True,
-                                   encoding="utf-8", timeout=300, creationflags=0x08000000)
-                saida = (r.stdout or r.stderr or "Sem resposta.").strip()
-            except FileNotFoundError:
-                saida = "Não achei o Claude Code instalado (comando claude)."
-            except subprocess.TimeoutExpired:
-                saida = "Demorou demais. Tente pelo Claude."
-            self.root.after(0, lambda: self.fim_chat(saida))
-
-        threading.Thread(target=rodar, daemon=True).start()
-
-    def fim_chat(self, saida):
-        self.chat_rodando = False
-        self.escrever_resposta(saida)
-        if self.chat:
-            self.entrada.delete(0, "end")
+    def cuidar_do_chat(self):
+        """Barra aparece com o mouse no mascote e some se ficar sem uso."""
+        c = self.garantir_chat()
+        if self.cursor_dentro and not self.arraste:
+            if not c.aberto:
+                self.posicionar_chat()
+                c.abrir()
+            self.chat_fora_desde = None
+        elif c.aberto:
+            if c.em_uso(posicao_cursor()):
+                self.chat_fora_desde = None
+            elif self.chat_fora_desde is None:
+                self.chat_fora_desde = time.time()
+            elif time.time() - self.chat_fora_desde > 2.5:
+                c.fechar()
 
     def aviso(self, texto):
         j = self.nova_janela()

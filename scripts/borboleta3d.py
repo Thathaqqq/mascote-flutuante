@@ -11,7 +11,7 @@ Só usa Pillow.
 import math
 from collections import OrderedDict
 
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 SUPER = 2          # desenha no dobro e reduz, para as bordas ficarem suaves
 FAIXAS = 6         # faixas por asa (curvatura suave)
@@ -166,6 +166,18 @@ class Borboleta3D:
         H = self.H
         pecas = []
         bend = (7 + batida * 0.12) * 2 / (FAIXAS - 1)  # a ponta curva mais quando a asa sobe
+        # de costas ou de frente vale para a asa inteira (pela inclinação média), sem listras
+        avesso_asa = {}
+        for lado in (1, -1):
+            for asa in ("frente", "tras"):
+                base = batida if asa == "frente" else batida * 0.82 + 4
+                a = math.radians(base + bend * (FAIXAS - 1) / 2)
+                local = [[0, -H / 2, 0], [lado * math.cos(a), -H / 2, math.sin(a)],
+                         [lado * math.cos(a), H / 2, math.sin(a)], [0, H / 2, 0]]
+                n = _normal([_girar(p, *giro) for p in local])
+                if _normal(local)[2] < 0:
+                    n = [-c for c in n]
+                avesso_asa[(lado, asa)] = n[2] < 0
         for f in self.faixas:
             lado, k = f["lado"], f["k"]
             base = batida if f["asa"] == "frente" else batida * 0.82 + 4
@@ -200,10 +212,16 @@ class Borboleta3D:
             except ValueError:
                 continue
             camada = f["img"].transform((x1b - x0, y1b - y0), Image.PERSPECTIVE, coef, Image.BICUBIC)
-            avesso = n[2] < 0
+            avesso = avesso_asa[(lado, f["asa"])]
             dif = max(0.0, sum(a * b for a, b in zip(n, self.luz)))
-            fator = (0.72 + 0.38 * dif) * (0.5 if avesso else 1.0)
-            rgb = ImageEnhance.Brightness(camada.convert("RGB")).enhance(fator)
+            if avesso:
+                # lado de baixo da morpho: marrom, com as nervuras da própria foto
+                dif = max(0.0, -sum(a * b for a, b in zip(n, self.luz)))
+                cinza = ImageOps.autocontrast(camada.convert("L"), cutoff=2)
+                rgb = ImageOps.colorize(cinza, black=(38, 26, 18), mid=(122, 88, 58), white=(196, 160, 118))
+                rgb = ImageEnhance.Brightness(rgb).enhance(0.75 + 0.3 * dif)
+            else:
+                rgb = ImageEnhance.Brightness(camada.convert("RGB")).enhance(0.72 + 0.38 * dif)
             esp = max(0.0, sum(a * b for a, b in zip(n, self.meio_luz))) ** 12
             forca = min(0.85, esp * 0.7 + brilho * 0.35)
             if forca > 0.02 and not avesso:

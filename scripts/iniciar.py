@@ -18,7 +18,7 @@ AQUI = Path(__file__).resolve().parent
 BASE = Path.home() / ".claude" / "mascote"
 CONFIG = BASE / "config.json"
 PORTA = 47653
-CHAVES_SIM_NAO = {"mini", "seguir", "automatico"}
+CHAVES_SIM_NAO = {"mini", "seguir", "automatico", "som", "pousar"}
 
 
 def enviar(comando):
