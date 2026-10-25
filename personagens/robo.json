@@ -1,0 +1,20 @@
+{
+  "nome": "Robô",
+  "cores": {
+    "X": "#9CA3AF",
+    "Y": "#F59E0B",
+    "B": "#374151",
+    "E": "#22D3EE"
+  },
+  "mapa": [
+    ".....YY.....",
+    ".....BB.....",
+    ".XXXXXXXXXX.",
+    ".XEEXXXXEEX.",
+    ".XEEXXXXEEX.",
+    ".XXXBBBBXXX.",
+    "YXXXXXXXXXXY",
+    "..XXXXXXXX..",
+    "..BB....BB.."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "nome": "Borboleta",
+  "cores": {
+    "X": "#3B6FD9",
+    "Y": "#8FB3F5",
+    "B": "#1E2A4A",
+    "E": "#FFFFFF"
+  },
+  "mapa": [
+    "XXX......XXX",
+    "XYXX.BB.XXYX",
+    "XYYXXEEXXYYX",
+    "XXYXXBBXXYXX",
+    ".XXXXBBXXXX.",
+    "..XXXBBXXX..",
+    ".XYXXBBXXYX.",
+    "XYYX.BB.XYYX",
+    "XXX..BB..XXX"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "mascote-flutuante",
+  "description": "Mascote flutuante para o Claude",
+  "owner": {
+    "name": "Thaís Quaranta"
+  },
+  "plugins": [
+    {
+      "name": "mascote-flutuante",
+      "source": "./",
+      "description": "Mascote flutuante que mostra o que o Claude está fazendo, segue o cursor e tem chat rápido. Personagens prontos e personalizados."
+    }
+  ]
+}

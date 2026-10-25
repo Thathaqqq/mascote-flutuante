@@ -1,0 +1,18 @@
+{
+  "nome": "Fantasma",
+  "cores": {
+    "X": "#C7D2FE",
+    "E": "#312E81"
+  },
+  "mapa": [
+    "...XXXXXX...",
+    "..XXXXXXXX..",
+    ".XXXXXXXXXX.",
+    ".XXEXXXXEXX.",
+    ".XXEXXXXEXX.",
+    ".XXXXXXXXXX.",
+    ".XXXXXXXXXX.",
+    ".XXXXXXXXXX.",
+    ".X.XX.XX.XX."
+  ]
+}

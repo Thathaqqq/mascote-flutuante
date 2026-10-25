@@ -1,0 +1,18 @@
+{
+  "nome": "Clawd",
+  "cores": {
+    "X": "#D97757",
+    "E": "#1F1F1F"
+  },
+  "mapa": [
+    "..XXXXXXXX..",
+    "..XXXXXXXX..",
+    "..XEXXXXEX..",
+    "..XEXXXXEX..",
+    "XXXXXXXXXXXX",
+    "XXXXXXXXXXXX",
+    "..XXXXXXXX..",
+    "..X.X..X.X..",
+    "..X.X..X.X.."
+  ]
+}

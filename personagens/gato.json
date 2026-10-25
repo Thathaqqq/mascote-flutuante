@@ -1,0 +1,19 @@
+{
+  "nome": "Gato",
+  "cores": {
+    "X": "#6B7280",
+    "N": "#F9A8D4",
+    "E": "#111111"
+  },
+  "mapa": [
+    ".X........X.",
+    ".XX......XX.",
+    ".XXXXXXXXXX.",
+    ".XEXXXXXXEX.",
+    ".XXXXNNXXXX.",
+    "..XXXXXXXX..",
+    ".XXXXXXXXXX.",
+    ".XXXXXXXXXX.",
+    ".X.X....X.X."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "mascote-flutuante",
+  "version": "0.1.0",
+  "description": "Mascote flutuante que mostra o que o Claude está fazendo (trabalhando, precisa de você, pronto), reage ao cursor e tem chat rápido. Personagens prontos, incluindo uma borboleta em 3D, e personalizados. Windows, com Python 3.",
+  "author": {
+    "name": "Thaís Quaranta"
+  },
+  "keywords": [
+    "mascote",
+    "pet",
+    "status",
+    "companheiro"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Thathaqqq/mascote-flutuante",
+  "repository": "https://github.com/Thathaqqq/mascote-flutuante"
+}
