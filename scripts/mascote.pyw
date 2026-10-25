@@ -280,7 +280,7 @@ class Mascote:
                 continue
             entrou = marca[2] != antes[2] and marca[2] in ("esperando", "pronto")
             if marca[1] > antes[1] or marca[0] > antes[0] or entrou:
-                plataforma.tocar_som(marca[2], self.cfg.get("som_nome"))
+                plataforma.tocar_som(marca[2], self.cfg.get("som_nome"), self.cfg.get("som_arquivo"))
                 tocou = True
         self.estado_por_sessao = agora_por_sessao
         self.estado = novo
@@ -689,8 +689,19 @@ class Mascote:
         salvar_config(self.cfg)
         self.preencher_bandeja(forcar=True)
 
+    def escolher_arquivo_som(self):
+        from tkinter import filedialog
+        arq = filedialog.askopenfilename(parent=self.root, title="Escolha o som do aviso",
+                                         filetypes=[("Sons", "*.wav *.mp3 *.m4a *.aiff"), ("Todos", "*.*")])
+        if not arq:
+            return
+        self.cfg["som_arquivo"] = arq
+        salvar_config(self.cfg)
+        plataforma.tocar_som(arquivo=arq)
+
     def escolher_som(self, nome):
         self.cfg["som_nome"] = nome
+        self.cfg.pop("som_arquivo", None)
         salvar_config(self.cfg)
         plataforma.tocar_som(nome=nome)  # toca para a pessoa ouvir como fica
 
@@ -753,10 +764,14 @@ class Mascote:
         m.add_checkbutton(label="Aviso sonoro (padrão das conversas)", variable=self._v_som,
                           command=lambda: self.alternar("som", True))
         sons = tk.Menu(m, tearoff=0)
-        self._v_som_nome = tk.StringVar(value=self.cfg.get("som_nome", plataforma.SOM_PADRAO))
+        self._v_som_nome = tk.StringVar(value="arquivo" if self.cfg.get("som_arquivo")
+                                        else self.cfg.get("som_nome", plataforma.SOM_PADRAO))
         for nome in plataforma.SONS:
             sons.add_radiobutton(label=nome, value=nome, variable=self._v_som_nome,
                                  command=lambda n=nome: self.escolher_som(n))
+        sons.add_separator()
+        sons.add_radiobutton(label="Meu arquivo de som", value="arquivo", variable=self._v_som_nome,
+                             command=self.escolher_arquivo_som)
         m.add_cascade(label="Som do aviso", menu=sons)
         if plataforma.POUSO_DISPONIVEL:
             m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,

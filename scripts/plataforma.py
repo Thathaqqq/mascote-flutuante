@@ -137,24 +137,38 @@ if WIN:
     _MIDIA = Path(os.environ.get("WINDIR", "C:/Windows")) / "Media"
     SONS = {"Notificação": "Windows Notify System Generic.wav", "Mensagem": "Windows Notify Messaging.wav",
             "E-mail": "Windows Notify Email.wav", "Calendário": "Windows Notify Calendar.wav",
-            "Sino": "Windows Notify.wav"}
+            "Sino": "Windows Notify.wav", "Ding": "Windows Ding.wav", "Carrilhão": "chimes.wav",
+            "Acorde": "chord.wav", "Tada": "tada.wav", "Toque": "Ring01.wav",
+            "Proximidade": "Windows Proximity Notification.wav", "Cutucada": "Windows Message Nudge.wav"}
 elif MAC:
     _MIDIA = Path("/System/Library/Sounds")
     SONS = {"Notificação": "Glass.aiff", "Mensagem": "Ping.aiff", "E-mail": "Pop.aiff",
-            "Calendário": "Hero.aiff", "Sino": "Purr.aiff"}
+            "Calendário": "Hero.aiff", "Sino": "Purr.aiff", "Ding": "Tink.aiff", "Carrilhão": "Submarine.aiff",
+            "Acorde": "Blow.aiff", "Tada": "Funk.aiff", "Toque": "Morse.aiff", "Proximidade": "Bottle.aiff",
+            "Cutucada": "Frog.aiff"}
 else:
     _MIDIA, SONS = Path("."), {}
 SOM_PADRAO = "Notificação"
 
 
-def tocar_som(tipo=None, nome=None):
-    """Toca o som escolhido (nome de SONS). Se o arquivo não existir, usa o aviso do sistema."""
-    arq = _MIDIA / SONS.get(nome or SOM_PADRAO, "")
+def _tocar_mp3_windows(arq):
+    """Toca MP3 (ou outro formato) no Windows pelo tocador embutido do sistema."""
+    mci = ctypes.windll.winmm.mciSendStringW
+    mci("close somMascote", None, 0, None)
+    mci(f'open "{arq}" alias somMascote', None, 0, None)
+    mci("play somMascote", None, 0, None)
+
+
+def tocar_som(tipo=None, nome=None, arquivo=None):
+    """Toca o som escolhido: um arquivo da pessoa (WAV ou MP3) ou um dos SONS do sistema."""
+    arq = Path(arquivo) if arquivo else _MIDIA / SONS.get(nome or SOM_PADRAO, "")
     try:
         if WIN:
             import winsound
-            if arq.is_file():
+            if arq.is_file() and arq.suffix.lower() == ".wav":
                 winsound.PlaySound(str(arq), winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+            elif arq.is_file():
+                _tocar_mp3_windows(arq)
             else:
                 winsound.MessageBeep(0x40)
         elif MAC:
