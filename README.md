@@ -30,8 +30,7 @@ A Borboleta IBA usa a foto da morpho-azul do logo do Instituto Borboleta Azul, c
 
 | O que o cursor faz | O que ela faz |
 |---|---|
-| Fica longe e parado | Pousa e abre e fecha as asas devagar |
-| Chega perto | Acorda e bate as asas mais rápido |
+| Trabalhos acabaram | Pousa e fica parada, de asas abertas |
 | Passa por cima | Abre bem as asas, com brilho |
 | Muda de lado | Vira o corpo e as antenas para o cursor |
 | Chega muito rápido | Se assusta e bate as asas forte |

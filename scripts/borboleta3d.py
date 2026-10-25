@@ -353,20 +353,15 @@ class Voo:
         """rel: posição do cursor em relação à borboleta (px). Devolve a pose."""
         self.t += dt
         t = self.t
-        perto = math.hypot(*rel) < 170
 
         if estado == "trabalhando":
             c, a, f, alt = 34, 34, 3.2, 10 + 4 * math.sin(t * 2.1)
         elif estado == "esperando":
             c, a, f, alt = 34, 38, 4.4, 16 + 9 * abs(math.sin(t * 2.6))
-        elif estado == "pronto":
-            c, a, f, alt = 14, 12, 0.8, 4
         elif estado == "bloqueado":
             c, a, f, alt = 58, 8, 0.6, 0
-        else:  # pousada, abrindo e fechando devagar como quem toma sol
-            c, a, f, alt = 34, 26, 0.35, 0
-            if perto:
-                c, a, f, alt = 32, 30, 1.8, 6
+        else:  # trabalhos acabaram (pronto ou parado): pousa e fica parada, de asas abertas
+            c, a, f, alt = 16, 0, 0.0, 0
         if dentro:  # cursor em cima: abre as asas e se mostra
             c, a, f = 10, 8, 0.9
         if andando:
@@ -398,6 +393,6 @@ class Voo:
         self.pitch = _lerp(self.pitch, pitch_alvo, min(1.0, dt * 5))
         self.roll = _lerp(self.roll, roll_alvo, min(1.0, dt * 6))
 
-        brilho_alvo = 0.5 + 0.5 * math.sin(t * 3) if estado == "pronto" else (0.4 if dentro else 0.0)
+        brilho_alvo = 0.45 if estado == "pronto" else (0.4 if dentro else 0.0)  # pronto: brilho fixo, sem piscar
         self.brilho = _lerp(self.brilho, brilho_alvo, min(1.0, dt * 4))
         return batida, self.yaw, self.pitch, self.roll, self.brilho, self.altura

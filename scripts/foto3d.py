@@ -154,13 +154,11 @@ class Bicho:
         elif estado == "esperando":
             if self.altura < 1:
                 self._pular(220)  # pulando, querendo atenção
-        elif estado == "pronto":
-            roll_alvo = 7 * math.sin(t * 6)  # rebolando de alegria
         elif estado == "bloqueado":
             pitch_alvo += 12
             respiro *= 0.94
-        else:
-            # de vez em quando inclina a cabeça, curioso
+        elif estado != "pronto":
+            # parado à toa: de vez em quando inclina a cabeça, curioso (com trabalho pronto, fica quieto)
             if t > self.proxima_inclinada:
                 self.inclinar_ate = t + 1.4
                 self.proxima_inclinada = t + 5 + (t * 7.3) % 5
