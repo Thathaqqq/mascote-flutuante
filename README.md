@@ -11,14 +11,14 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 
 ## O que ele faz
 
-- Clique no mascote: abre a janela do Claude.
+- Clique no mascote: vai direto para a conversa que está chamando (primeiro as que precisam de você, depois as travadas e as prontas). Clique de novo: vai para a próxima que está chamando. Sem nenhuma chamando, abre o Claude.
 - Clique no número ao lado dele: lista das conversas, com o título, o estado de cada uma e o começo do último pedido. Clicar numa conversa abre aquela conversa no aplicativo do Claude (aba Code). Conversas do terminal abrem só o Claude.
 - Botão direito: menu com chat rápido, modo mini, seguir o cursor, personagem e sair.
 - Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço (no Mac, Control+Option+Espaço), de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
 - Os olhos acompanham o cursor do mouse; ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
-- Aviso sonoro: um som discreto do Windows quando o Claude precisa de você ou termina (liga e desliga no menu).
+- Aviso sonoro: um som discreto do sistema quando uma conversa precisa de você ou termina. Na lista de conversas, cada uma tem "Som ligado" ou "Sem som": clique para escolher só para aquela conversa. O "Aviso sonoro" do menu vale para as conversas que você não ajustou.
 - Pousar na janela ativa (só Windows por enquanto): ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
 - Arraste para mudar de lugar; ele lembra onde ficou.
 

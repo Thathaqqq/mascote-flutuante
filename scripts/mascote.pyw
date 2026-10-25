@@ -156,6 +156,9 @@ class Mascote:
         self.chat_obj = None
         self.chat_fora_desde = None
         self.iniciado = False
+        self.estado_por_sessao = {}
+        self.ultima_aberta = None
+        self.assinatura_bandeja = None
         self.atalho_antes = False
         self.alvo_pouso = None
         self.chat_rodando = False
@@ -264,9 +267,19 @@ class Mascote:
         if self.chat_rodando:
             estados.add("trabalhando")
         novo = next((e for e in PRIORIDADE if e in estados), "ocioso")
-        if (self.iniciado and novo != self.estado and novo in ("esperando", "pronto")
-                and self.cfg.get("som", True)):
-            plataforma.tocar_som(novo)
+        # som: só para a conversa que acabou de chamar e está com som ligado
+        tocou = False
+        agora_por_sessao = {}
+        for s in self.sessoes:
+            e, sid = s.get("estado"), s["sessao"]
+            agora_por_sessao[sid] = (e, s.get("quando"))
+            antes = self.estado_por_sessao.get(sid)
+            mudou = antes is None or antes != (e, s.get("quando"))
+            if (self.iniciado and not tocou and mudou and e in ("esperando", "pronto")
+                    and (antes is None or antes[0] != e) and self.som_da(sid)):
+                plataforma.tocar_som(e)
+                tocou = True
+        self.estado_por_sessao = agora_por_sessao
         self.estado = novo
         self.iniciado = True
         if self.bandeja:
@@ -430,7 +443,7 @@ class Mascote:
             qtd = sum(1 for s in self.sessoes if s.get("estado") == "trabalhando") + (1 if self.chat_rodando else 0)
             texto = (f"Trabalhando em {qtd}" if qtd > 1 else texto) + "." * (f // 4 % 4)
         elif not texto and time.time() < self.dica_ate:
-            texto = "Clique para abrir o Claude"
+            texto = "Clique para ir à conversa"
         elif not texto and self.cursor_dentro:
             texto = "Oi!"
         return "" if self.cfg.get("mini") else texto
@@ -662,12 +675,46 @@ class Mascote:
         if a and a[0] - 3 <= ev.x <= a[2] + 3 and a[1] - 3 <= ev.y <= a[3] + 3:
             self.alternar_bandeja()
             return
-        self.abrir_claude()
+        self.ir_para_proxima()
+
+    def som_da(self, sid):
+        return self.cfg.get("som_conversas", {}).get(sid, self.cfg.get("som", True))
+
+    def alternar_som_da(self, sid):
+        sons = self.cfg.setdefault("som_conversas", {})
+        sons[sid] = not self.som_da(sid)
+        salvar_config(self.cfg)
+        self.preencher_bandeja(forcar=True)
+
+    def chamando(self):
+        """Conversas que pedem atenção: primeiro as que precisam de você, depois travadas e prontas."""
+        lista = []
+        for s in self.sessoes:
+            e = s.get("estado")
+            if e not in ("esperando", "bloqueado", "pronto"):
+                continue
+            if e != "esperando" and self.vistos.get(s["sessao"]) == s.get("quando"):
+                continue
+            lista.append(s)
+        lista.sort(key=lambda s: (PRIORIDADE.index(s["estado"]), -s.get("quando", 0)))
+        return lista
+
+    def ir_para_proxima(self):
+        """Cada clique leva à próxima conversa chamando; sem nenhuma chamando, abre o Claude."""
+        lista = self.chamando()
+        if not lista:
+            self.abrir_claude()
+            return
+        ids = [s["sessao"] for s in lista]
+        i = (ids.index(self.ultima_aberta) + 1) % len(ids) if self.ultima_aberta in ids else 0
+        self.ultima_aberta = ids[i]
+        self.abrir_conversa(lista[i])
 
     def abrir_conversa(self, s):
         """Abre aquela conversa no aplicativo do Claude; se não der, abre o Claude."""
         self.vistos[s["sessao"]] = s.get("quando")
         if plataforma.abrir_sessao(s["sessao"]):
+            self.root.after(350, focar_claude)  # o link abre a conversa; isto traz o Claude para a frente
             if self.bandeja:
                 self.alternar_bandeja()
         else:
@@ -695,7 +742,8 @@ class Mascote:
                           command=lambda: self.alternar("automatico", True))
         self._v_som = tk.BooleanVar(value=bool(self.cfg.get("som", True)))
         self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
-        m.add_checkbutton(label="Aviso sonoro", variable=self._v_som, command=lambda: self.alternar("som", True))
+        m.add_checkbutton(label="Aviso sonoro (padrão das conversas)", variable=self._v_som,
+                          command=lambda: self.alternar("som", True))
         if plataforma.POUSO_DISPONIVEL:
             m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
                               command=lambda: self.alternar("pousar", False))
@@ -792,10 +840,17 @@ class Mascote:
             self.bandeja = None
             return
         self.bandeja = self.nova_janela()
-        self.preencher_bandeja()
+        self.preencher_bandeja(forcar=True)
 
-    def preencher_bandeja(self):
+    def preencher_bandeja(self, forcar=False):
         b = self.bandeja
+        if not b:
+            return
+        assinatura = tuple((s["sessao"], s.get("estado"), s.get("quando"), self.vistos.get(s["sessao"]),
+                            self.som_da(s["sessao"])) for s in self.sessoes[:8])
+        if assinatura == self.assinatura_bandeja and not forcar:
+            return  # nada mudou: não refaz (o clique não se perde)
+        self.assinatura_bandeja = assinatura
         for w in b.winfo_children():
             w.destroy()
         caixa = tk.Frame(b, bg="white", padx=12, pady=10)
@@ -811,6 +866,11 @@ class Mascote:
             linha.pack(fill="x")
             tk.Label(linha, text="\u25CF", fg=COR_ESTADO["ocioso" if visto else e], bg="white",
                      font=(FONTE_UI, 11)).pack(side="left", anchor="n")
+            som = self.som_da(s["sessao"])
+            botao_som = tk.Label(linha, text="Som ligado" if som else "Sem som", bg="white",
+                                 fg="#2F6FED" if som else "#9AA0A6", cursor="hand2", font=(FONTE_UI, 8))
+            botao_som.pack(side="right", anchor="n", padx=(10, 0))
+            botao_som.bind("<Button-1>", lambda _, sid=s["sessao"]: self.alternar_som_da(sid))
             txt = tk.Frame(linha, bg="white")
             txt.pack(side="left", fill="x", padx=(6, 0))
             info = plataforma.sessoes_do_app().get(s["sessao"], {})
@@ -824,7 +884,7 @@ class Mascote:
                          fg="#374151", font=(FONTE_UI, 9), anchor="w", justify="left").pack(fill="x")
             tk.Label(txt, text=f"{TEXTO_ESTADO.get(e) or 'Parada'} · {ha_quanto(s.get('quando', 0))}",
                      bg="white", fg="#6B7280", font=(FONTE_UI, 8), anchor="w").pack(fill="x")
-            for w in [linha] + list(linha.winfo_children()) + list(txt.winfo_children()):
+            for w in [linha, txt] + [w for w in linha.winfo_children() if w not in (botao_som, txt)]                     + list(txt.winfo_children()):
                 w.bind("<Button-1>", lambda _, sessao=s: self.abrir_conversa(sessao))
         b.update_idletasks()
         self.posicionar_janelas()
