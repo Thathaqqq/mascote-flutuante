@@ -430,11 +430,22 @@ class ChatRapido:
         self.ao_comecar()
 
         def rodar():
-            # Só o necessário para achar e rodar o comando claude; nada mais do ambiente passa adiante.
-            chaves = ("PATH", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
-                      "SYSTEMROOT", "COMSPEC", "PATHEXT", "SHELL", "LANG", "CLAUDE_CONFIG_DIR")
-            env = {k: os.environ[k] for k in chaves if k in os.environ}
-            env["MASCOTE_INTERNO"] = "1"
+            # Só o necessário para achar e rodar o comando claude (caminhos do sistema e pasta de
+            # configuração); nenhuma outra variável do ambiente passa adiante.
+            env = {"MASCOTE_INTERNO": "1"}
+            env["PATH"] = os.environ.get("PATH", "")
+            env["HOME"] = os.environ.get("HOME", str(Path.home()))
+            env["USERPROFILE"] = os.environ.get("USERPROFILE", str(Path.home()))
+            env["APPDATA"] = os.environ.get("APPDATA", "")
+            env["LOCALAPPDATA"] = os.environ.get("LOCALAPPDATA", "")
+            env["TEMP"] = os.environ.get("TEMP", "")
+            env["TMP"] = os.environ.get("TMP", "")
+            env["SYSTEMROOT"] = os.environ.get("SYSTEMROOT", "")
+            env["COMSPEC"] = os.environ.get("COMSPEC", "")
+            env["PATHEXT"] = os.environ.get("PATHEXT", "")
+            env["LANG"] = os.environ.get("LANG", "")
+            env["CLAUDE_CONFIG_DIR"] = os.environ.get("CLAUDE_CONFIG_DIR", "")
+            env = {k: v for k, v in env.items() if v}
             cmd = ["claude", "-p", pergunta, "--output-format", "json"]
             if self.sessao:
                 cmd += ["--resume", self.sessao]
