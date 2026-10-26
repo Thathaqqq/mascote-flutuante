@@ -34,7 +34,7 @@ except Exception:
     TEM_PIL = False
 
 AQUI = Path(__file__).resolve().parent
-BASE = Path.home() / ".claude" / "mascote"
+BASE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "mascote"
 PASTA_ESTADO = BASE / "estado"
 PASTA_PERSONAGENS = BASE / "personagens"
 PERSONAGENS_PRONTOS = AQUI.parent / "personagens"

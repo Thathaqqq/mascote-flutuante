@@ -5,6 +5,8 @@ description: Liga, desliga e configura o mascote flutuante do Claude (personagem
 
 # Mascote do Claude
 
+A pasta `~/.claude` citada abaixo é a pasta de configuração do Claude Code; se a variável `CLAUDE_CONFIG_DIR` estiver definida, o mascote usa essa pasta no lugar.
+
 O mascote é uma janelinha que fica por cima das outras e mostra o que o Claude está fazendo. Os scripts estão em `${CLAUDE_PLUGIN_ROOT}/scripts`. Funciona no Windows e no Mac com Python 3 instalado.
 
 Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py" ...` (no Mac, `python3`).

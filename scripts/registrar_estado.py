@@ -9,7 +9,7 @@ import sys
 import time
 from pathlib import Path
 
-PASTA = Path.home() / ".claude" / "mascote" / "estado"
+PASTA = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "mascote" / "estado"
 
 ESTADO_POR_EVENTO = {
     "UserPromptSubmit": "trabalhando",

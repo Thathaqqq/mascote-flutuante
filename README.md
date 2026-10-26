@@ -80,7 +80,7 @@ Pelo menu do botão direito ou pedindo ao Claude com `/mascote`:
 
 ## Privacidade
 
-Tudo fica no seu computador, em `~/.claude/mascote`. O mascote guarda só o estado de cada conversa e os primeiros 120 caracteres do último pedido, para mostrar na lista. Conversas paradas há mais de 12 horas somem da lista. O chat rápido usa a sua própria conta do Claude.
+Tudo fica no seu computador, em `~/.claude/mascote` (ou na pasta indicada por `CLAUDE_CONFIG_DIR`, se você usa mais de uma conta). O mascote guarda só o estado de cada conversa e os primeiros 120 caracteres do último pedido, para mostrar na lista. Conversas paradas há mais de 12 horas somem da lista. O chat rápido usa a sua própria conta do Claude.
 
 ## Desinstalar
 

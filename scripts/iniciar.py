@@ -15,7 +15,8 @@ import sys
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-BASE = Path.home() / ".claude" / "mascote"
+import os
+BASE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "mascote"
 CONFIG = BASE / "config.json"
 PORTA = 47653
 CHAVES_SIM_NAO = {"mini", "seguir", "automatico", "som", "pousar"}

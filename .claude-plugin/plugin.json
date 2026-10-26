@@ -1,6 +1,6 @@
 {
   "name": "mascote-flutuante",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Mascote flutuante que mostra o que o Claude está fazendo (trabalhando, precisa de você, pronto), reage ao cursor e tem chat rápido. Personagens prontos, incluindo uma borboleta em 3D, e personalizados. Windows e Mac, com Python 3.",
   "author": {
     "name": "Thaís Quaranta"
