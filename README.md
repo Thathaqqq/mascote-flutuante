@@ -64,6 +64,8 @@ claude plugin marketplace add Thathaqqq/mascote-flutuante
 claude plugin install mascote-flutuante@mascote-flutuante
 ```
 
+Este é um marketplace próprio, não revisado pela Anthropic; o código é aberto e está todo neste repositório. A atualização automática fica desligada por padrão em marketplaces de terceiros e pode ser ligada em `/plugin` > Marketplaces.
+
 Depois feche e abra o Claude. O mascote aparece sozinho ao abrir uma conversa. Para ligar à mão, digite `/mascote` em qualquer conversa.
 
 ## Configurar
