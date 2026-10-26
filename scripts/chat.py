@@ -430,7 +430,11 @@ class ChatRapido:
         self.ao_comecar()
 
         def rodar():
-            env = dict(os.environ, MASCOTE_INTERNO="1")
+            # Só o necessário para achar e rodar o comando claude; nada mais do ambiente passa adiante.
+            chaves = ("PATH", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
+                      "SYSTEMROOT", "COMSPEC", "PATHEXT", "SHELL", "LANG", "CLAUDE_CONFIG_DIR")
+            env = {k: os.environ[k] for k in chaves if k in os.environ}
+            env["MASCOTE_INTERNO"] = "1"
             cmd = ["claude", "-p", pergunta, "--output-format", "json"]
             if self.sessao:
                 cmd += ["--resume", self.sessao]
