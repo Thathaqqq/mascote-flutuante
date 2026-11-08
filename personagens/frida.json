@@ -1,6 +1,5 @@
 {
   "nome": "Frida",
   "tipo": "foto",
-  "imagem": "frida.png",
-  "espelhar": false
+  "imagem": "frida.png"
 }

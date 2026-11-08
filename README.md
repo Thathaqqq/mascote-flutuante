@@ -26,7 +26,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 
 Prontos: Frida (pug preta, ilustrada), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô e Fantasma.
 
-A **Frida** é uma pug preta ilustrada no estilo de desenho animado. Como os personagens de foto, ela ganha volume e vira para o lado do cursor, inclina a cabeça curiosa e respira. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, abaixa a cabeça; quando o trabalho fica pronto, brilha.
+A **Frida** é uma pug preta ilustrada no estilo de desenho animado. Como os personagens de foto, ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa, respira e pula quando você clica. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto, fica quietinha e o balão verde avisa.
 
 A Borboleta IBA usa a foto da morpho-azul do logo do Instituto Borboleta Azul, com uso animado autorizado pela gestão do Instituto em 25/10/2026. As asas da foto ganham volume, curvatura e brilho conforme a luz; corpo e antenas são modelados em 3D. Ela reage ao cursor:
 
@@ -42,7 +42,7 @@ A Borboleta IBA usa a foto da morpho-azul do logo do Instituto Borboleta Azul, c
 
 Também dá para transformar qualquer foto de borboleta (vista de cima, fundo transparente) numa borboleta 3D: peça "/mascote cria uma borboleta 3D com esta foto".
 
-**Com a sua foto:** botão direito no mascote > Personagem > Criar personagem com foto... Escolha a foto (do seu cachorro, gato, de você) e dê um nome. Com fundo liso, o fundo sai sozinho; com fundo cheio de coisas, recorte antes no Paint do Windows (Remover plano de fundo). O personagem de foto vira para o lado do cursor, inclina a cabeça curioso, respira, pula quando você clica, fica pulando quando o Claude precisa de você e rebola quando ele termina.
+**Com a sua foto:** botão direito no mascote > Personagem > Criar personagem com foto... Escolha a foto (do seu cachorro, gato, de você) e dê um nome. Com fundo liso, o fundo sai sozinho; com fundo cheio de coisas, recorte antes no Paint do Windows (Remover plano de fundo). O personagem de foto vira para o lado do cursor, inclina a cabeça curioso, respira, pula quando você clica, fica pulando quando o Claude precisa de você e fica quietinho quando ele termina.
 
 Para criar um de quadradinhos, peça ao Claude: "/mascote cria um personagem de cachorro caramelo". Ele desenha, confere e já troca. Também dá para desenhar à mão: menu do botão direito, Personagem, Abrir pasta de personagens; lá há um exemplo comentado no arquivo `exemplo.json.txt`.
 

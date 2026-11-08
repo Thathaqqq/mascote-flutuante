@@ -1,8 +1,8 @@
 # Mascote Flutuante (skill)
 
-A floating desktop mascot that shows what Claude Code is doing: **working**, **needs you** or **done**. It sits on top of your windows, follows the cursor with its eyes, jumps when you click and has a quick chat bar. The mascot's texts are in Portuguese.
+A floating desktop mascot that shows what Claude Code is doing: **working**, **needs you** or **done**. It sits on top of your windows, reacts to your cursor, jumps when you click and has a quick chat bar. The mascot's texts are in Portuguese.
 
-Meet **Frida**, a black pug illustrated in an animated-film style. She gets volume and turns toward your cursor, tilts her head when she's curious and breathes. While Claude works, she hops. When Claude needs you, she keeps jumping. When something breaks, she lowers her head. When your work is ready, she glows. Other characters: a 3D blue morpho butterfly, pixel characters (Clawd, cat, robot, ghost), and your own from a photo of your pet.
+Meet **Frida**, a black pug illustrated in an animated-film style. She gets volume, turns to your cursor's side, tilts her head when she's idle and curious, breathes and jumps when you click. While Claude works, she hops. When Claude needs you, she keeps jumping. When something breaks, she slumps with her head down. When your work is ready, she sits still and the green balloon tells you. Other characters: a 3D blue morpho butterfly, pixel characters (Clawd, cat, robot, ghost), and your own from a photo of your pet.
 
 ## Install
 
