@@ -67,6 +67,8 @@ def validar(caminho):
         erros.append("falta 'nome'")
     if p.get("tipo") in ("borboleta3d", "foto"):
         img = Path(caminho).parent / p.get("imagem", "")
+        if p.get("imagem_feliz") and not (Path(caminho).parent / p["imagem_feliz"]).is_file():
+            erros.append(f"não achei a imagem '{p.get('imagem_feliz')}' na mesma pasta")
         if not img.is_file():
             erros.append(f"não achei a imagem '{p.get('imagem')}' na mesma pasta")
         else:

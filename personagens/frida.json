@@ -1,5 +1,6 @@
 {
   "nome": "Frida",
   "tipo": "foto",
-  "imagem": "frida.png"
+  "imagem": "frida.png",
+  "imagem_feliz": "frida-sorrindo.png"
 }

@@ -96,6 +96,9 @@ def carregar_personagens():
                 if not TEM_PIL or not (arq.parent / p.get("imagem", "")).is_file():
                     continue
                 p["_imagem"] = str(arq.parent / p["imagem"])
+                feliz = arq.parent / p.get("imagem_feliz", "")
+                if p.get("imagem_feliz") and feliz.is_file():  # carinha alegre, para os momentos felizes
+                    p["_imagem_feliz"] = str(feliz)
             elif not (p.get("mapa") and p.get("cores")):
                 continue
             todos[p.get("nome") or arq.stem] = p
@@ -141,6 +144,7 @@ class Mascote:
         self.estado = "ocioso"
         self.quadro = 0
         self.piscar_ate = 0
+        self.alegre_ate = 0.0  # até quando o personagem de foto usa a carinha alegre
         self.pulo_extra_ate = 0
         self.olhar_clique = None
         self.andando = False
@@ -215,12 +219,13 @@ class Mascote:
         nome = NOMES_ANTIGOS.get(self.cfg.get("personagem"), self.cfg.get("personagem"))
         return self.personagens.get(nome) or self.personagens.get("Clawd") or next(iter(self.personagens.values()))
 
-    def borboleta(self, p):
+    def borboleta(self, p, imagem=None):
         mini = bool(self.cfg.get("mini"))
-        chave = (p["_imagem"], mini)
+        imagem = imagem or p["_imagem"]
+        chave = (imagem, mini)
         if chave not in self.borboletas:
             if p.get("tipo") == "foto":
-                self.borboletas[chave] = foto3d.Foto3D(p["_imagem"], 54 if mini else 130)
+                self.borboletas[chave] = foto3d.Foto3D(imagem, 54 if mini else 130)
             else:
                 self.borboletas[chave] = borboleta3d.Borboleta3D(p["_imagem"], p.get("centro", 0.5),
                                                                  58 if mini else 150)
@@ -292,6 +297,8 @@ class Mascote:
                 plataforma.tocar_som(marca[2], self.cfg.get("som_nome"), self.cfg.get("som_arquivo"))
                 tocou = True
         self.estado_por_sessao = agora_por_sessao
+        if novo == "pronto" and self.estado != "pronto" and self.iniciado:
+            self.alegre_ate = time.time() + 4  # comemora um pouquinho quando o trabalho fica pronto
         self.estado = novo
         self.iniciado = True
         if self.bandeja:
@@ -328,6 +335,7 @@ class Mascote:
         self.ultimo_cursor = (cx, cy)
 
         if clicou_agora() and not self.cursor_dentro:
+            self.alegre_ate = max(self.alegre_ate, time.time() + 1.5)
             self.pulo_extra_ate = self.quadro + 8
             self.olhar_clique = (self.quadro + 30, self.dir_olhar)
             if self.voo:
@@ -517,7 +525,8 @@ class Mascote:
     def desenhar_foto(self, tela, dt):
         p = self.personagem()
         mini = self.cfg.get("mini")
-        modelo = self.borboleta(p)
+        alegre = self.cursor_dentro or time.time() < self.alegre_ate
+        modelo = self.borboleta(p, p.get("_imagem_feliz") if alegre else None)
         yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
             dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
             p.get("espelhar", True))
