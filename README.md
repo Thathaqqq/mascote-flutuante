@@ -24,11 +24,11 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 
 ## Personagens
 
-Prontos: Frida (pug preta, ilustrada), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô e Fantasma.
+Prontos: Frida (pug preta, ilustrada), Borboleta Azul (3D), Clawd, Borboleta, Gato, Robô e Fantasma.
 
 A **Frida** é uma pug preta ilustrada no estilo de desenho animado. Como os personagens de foto, ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa, respira e pula quando você clica. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto, fica quietinha e o balão verde avisa.
 
-A Borboleta IBA usa a foto da morpho-azul do logo do Instituto Borboleta Azul, com uso animado autorizado pela gestão do Instituto em 25/10/2026. As asas da foto ganham volume, curvatura e brilho conforme a luz; corpo e antenas são modelados em 3D. Ela reage ao cursor:
+A Borboleta Azul é uma morpho-azul feita a partir de uma foto. As asas da foto ganham volume, curvatura e brilho conforme a luz; corpo e antenas são modelados em 3D. Ela reage ao cursor:
 
 | O que o cursor faz | O que ela faz |
 |---|---|

@@ -45,7 +45,27 @@ def tirar_fundo(img, tolerancia=38):
     tirado = 1 - (sum(alfa.histogram()[i] * i for i in range(256)) / 255) / (w * h)
     saida = img.convert("RGBA")
     saida.putalpha(alfa)
-    return saida, tirado
+    return _limpar_borda(saida), tirado
+
+
+def _limpar_borda(img):
+    """A borda meio transparente ainda tem a cor do fundo (vira um contorno claro em tela escura):
+    pinta essa borda com a cor do bicho logo ao lado."""
+    alfa = img.getchannel("A")
+    solido = alfa.point(lambda v: 255 if v >= 250 else 0)
+    cor = Image.new("RGB", img.size, (0, 0, 0))
+    cor.paste(img.convert("RGB"), (0, 0), solido)
+    cor = cor.filter(ImageFilter.GaussianBlur(4))
+    peso = solido.filter(ImageFilter.GaussianBlur(4))
+    px, pa, pc, pp = img.load(), alfa.load(), cor.load(), peso.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            if 0 < pa[x, y] < 250 and pp[x, y] > 0:
+                k = 255 / pp[x, y]
+                r, g, b = pc[x, y]
+                px[x, y] = (min(255, int(r * k)), min(255, int(g * k)), min(255, int(b * k)), pa[x, y])
+    return img
 
 
 def criar_personagem(caminho_foto, nome, destino=PASTA_PERSONAGENS):
