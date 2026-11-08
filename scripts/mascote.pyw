@@ -59,7 +59,6 @@ TEXTO_ESTADO = {
     "ocioso": "",
 }
 PRIORIDADE = ["esperando", "bloqueado", "pronto", "trabalhando"]
-NOMES_ANTIGOS = {"Borboleta IBA": "Borboleta Azul"}  # quem já tinha escolhido continua com ela
 RESERVA = {"nome": "Clawd", "cores": {"X": "#D97757", "E": "#1F1F1F"}, "mapa": [
     "..XXXXXXXX..", "..XXXXXXXX..", "..XEXXXXEX..", "..XEXXXXEX..", "XXXXXXXXXXXX",
     "XXXXXXXXXXXX", "..XXXXXXXX..", "..X.X..X.X..", "..X.X..X.X.."]}
@@ -217,8 +216,6 @@ class Mascote:
 
     def personagem(self):
         nome = self.cfg.get("personagem")
-        if nome not in self.personagens:
-            nome = NOMES_ANTIGOS.get(nome, nome)
         return self.personagens.get(nome) or self.personagens.get("Clawd") or next(iter(self.personagens.values()))
 
     def borboleta(self, p, imagem=None):
