@@ -216,7 +216,9 @@ class Mascote:
         return ImageFont.load_default()
 
     def personagem(self):
-        nome = NOMES_ANTIGOS.get(self.cfg.get("personagem"), self.cfg.get("personagem"))
+        nome = self.cfg.get("personagem")
+        if nome not in self.personagens:
+            nome = NOMES_ANTIGOS.get(nome, nome)
         return self.personagens.get(nome) or self.personagens.get("Clawd") or next(iter(self.personagens.values()))
 
     def borboleta(self, p, imagem=None):
