@@ -16,7 +16,9 @@ This is the skill version, without hooks. The mascot reads the end of Claude Cod
 
 - *Working* and *done*: reliable.
 - *Needs you*: exact when Claude asks you a question. When Claude is waiting for a permission, it's a guess: a tool with no result after 15 seconds. A long-running command may show up as "needs you".
-- Nothing leaves your computer and there's no network access. It keeps only the first 120 characters of each conversation's last request, to show in the list.
+- The mascot itself makes no network calls. It reads the history on your computer and keeps one small file per conversation in `~/.claude/mascote/estado`, with the state, the project folder and the first 120 characters of the last request. The quick chat is the exception: it sends your question through your own Claude Code.
+- A guessed "needs you" plays no sound.
+- If the plugin version is also installed, its hooks take over and history reading pauses.
 - Status tracking works with Claude Code. In other agents the mascot opens and its commands work, but it doesn't follow their work.
 
 For exact states and auto-start with Claude, use the free plugin version (with hooks): `claude plugin marketplace add Thathaqqq/mascote-flutuante`, then `claude plugin install mascote-flutuante@mascote-flutuante`.
@@ -25,4 +27,4 @@ Windows and Mac. Open source (MIT): https://github.com/Thathaqqq/mascote-flutuan
 
 ---
 
-**Em português:** mascote que mostra o que o Claude Code está fazendo, com a Frida, uma pug preta em 3D. Descompacte em `~/.claude/skills/`, instale o Pillow e digite `/mascote-flutuante`. Esta versão lê o histórico das conversas no próprio computador. O aviso "precisa de você" é um palpite quando o Claude espera uma permissão. Para o estado exato, use o plugin (com ganchos).
+**Em português:** mascote que mostra o que o Claude Code está fazendo, com a Frida, uma pug preta em 3D. Descompacte em `~/.claude/skills/`, instale o Pillow e digite `/mascote-flutuante`. Esta versão lê o histórico das conversas no próprio computador. O aviso "precisa de você" é um palpite quando o Claude espera uma permissão (e não toca som). Para o estado exato, use o plugin (com ganchos).

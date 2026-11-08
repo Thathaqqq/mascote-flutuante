@@ -14,6 +14,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 FORA = {"registrar_estado.py", "empacotar_agensi.py"}
+TIPOS = {".py", ".pyw", ".json", ".png"}  # só o que o mascote usa (nada de arquivos soltos do editor)
 
 
 def skill_md():
@@ -39,7 +40,7 @@ def main():
         z.write(RAIZ / "LICENSE", "mascote-flutuante/LICENSE")
         for pasta in ("scripts", "personagens"):
             for arq in sorted((RAIZ / pasta).iterdir()):
-                if arq.is_file() and arq.name not in FORA and arq.suffix not in (".pyc",):
+                if arq.is_file() and arq.name not in FORA and arq.suffix in TIPOS:
                     z.write(arq, f"mascote-flutuante/{pasta}/{arq.name}")
     print(f"Pacote criado: {destino}")
 

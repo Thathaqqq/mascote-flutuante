@@ -114,15 +114,15 @@ def ha_quanto(ts):
     return f"há {s // 3600} h"
 
 
-def ler_sessoes():
-    """Lê os estados gravados pelo gancho. Ignora sessões paradas há mais de 12 h."""
+def ler_sessoes(com_vigia=False):
+    """Lê os estados gravados pelo gancho (e pelo vigia, se ligado). Ignora sessões paradas há mais de 12 h."""
     sessoes = []
     if not PASTA_ESTADO.exists():
         return sessoes
     agora = time.time()
     for arq in PASTA_ESTADO.glob("*.json"):
         r = ler_json(arq, None)
-        if r and agora - r.get("quando", 0) <= 12 * 3600:
+        if r and agora - r.get("quando", 0) <= 12 * 3600 and (com_vigia or r.get("fonte") != "vigia"):
             sessoes.append(r)
     sessoes.sort(key=lambda r: r.get("quando", 0), reverse=True)
     return sessoes
@@ -271,7 +271,7 @@ class Mascote:
                 self.vigia.atualizar()
             except Exception:
                 pass
-        self.sessoes = ler_sessoes()
+        self.sessoes = ler_sessoes(bool(self.cfg.get("vigia")))
         estados = set()
         for s in self.sessoes:
             e = s.get("estado")
@@ -292,7 +292,8 @@ class Mascote:
             antes = self.estado_por_sessao.get(sid)
             if not self.iniciado or antes is None or tocou or not self.som_da(sid):
                 continue
-            entrou = marca[2] != antes[2] and marca[2] in ("esperando", "pronto")
+            # palpite do vigia (talvez pedindo permissão) não toca: pode ser só um comando demorado
+            entrou = marca[2] != antes[2] and marca[2] in ("esperando", "pronto") and not s.get("palpite")
             if marca[1] > antes[1] or marca[0] > antes[0] or entrou:
                 plataforma.tocar_som(marca[2], self.cfg.get("som_nome"), self.cfg.get("som_arquivo"))
                 tocou = True
@@ -520,36 +521,23 @@ class Mascote:
         caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
         return y0 + caixa[1], x0 + caixa[2] - (10 if mini else 26)
 
-    # personagem de foto
+    # personagem de foto (e a Frida, que se mexe do mesmo jeito)
     def desenhar_foto(self, tela, dt):
         p = self.personagem()
         mini = self.cfg.get("mini")
         modelo = self.borboleta(p)
-        yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
-            dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
-            p.get("espelhar", True))
+        if p.get("tipo") == "pug3d":
+            yaw, pitch, roll, amasso, lado, brilho, alt, extra = self.frida.passo(
+                dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado)
+            pose = (yaw, pitch, roll, amasso, lado, brilho, extra)
+        else:
+            yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
+                dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
+                p.get("espelhar", True))
+            pose = (yaw, pitch, roll, amasso, lado, brilho)
         if mini:
             alt *= 0.4
-        sprite, (px_, py_) = modelo.desenhar(yaw, pitch, roll, amasso, lado, brilho)
-        chao = self.altura - (8 if mini else 16)
-        meio = self.largura / 2
-        caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
-        base = sprite.crop((caixa[0], caixa[3] - max(2, (caixa[3] - caixa[1]) // 4), caixa[2], caixa[3]))
-        sombra = borboleta3d.sombra_de(base, alt)
-        tela.alpha_composite(sombra, (int(meio - sombra.width / 2), int(chao - sombra.height / 2)))
-        x0, y0 = int(meio - px_), int(chao - py_ - alt)
-        tela.alpha_composite(sprite, (max(0, x0), max(0, y0)), (max(0, -x0), max(0, -y0)))
-        return y0 + caixa[1], x0 + caixa[2] - (6 if mini else 14)
-
-    # pug 3D (Frida)
-    def desenhar_pug(self, tela, dt):
-        mini = self.cfg.get("mini")
-        modelo = self.borboleta(self.personagem())
-        yaw, pitch, roll, amasso, lado, brilho, alt, extra = self.frida.passo(
-            dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado)
-        if mini:
-            alt *= 0.4
-        sprite, (px_, py_) = modelo.desenhar(yaw, pitch, roll, amasso, lado, brilho, extra)
+        sprite, (px_, py_) = modelo.desenhar(*pose)
         chao = self.altura - (8 if mini else 16)
         meio = self.largura / 2
         caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
@@ -564,10 +552,8 @@ class Mascote:
         tela = Image.new("RGBA", (self.largura, self.altura), (0, 0, 0, 0))
         e = self.estado
         mini = self.cfg.get("mini")
-        if self.personagem().get("tipo") == "foto":
+        if self.personagem().get("tipo") in ("foto", "pug3d"):
             topo, direita = self.desenhar_foto(tela, dt)
-        elif self.personagem().get("tipo") == "pug3d":
-            topo, direita = self.desenhar_pug(tela, dt)
         elif eh_3d(self.personagem()):
             topo, direita = self.desenhar_borboleta(tela, dt)
         else:
@@ -794,8 +780,9 @@ class Mascote:
         m.add_checkbutton(label="Modo mini", variable=self._v_mini, command=self.alternar_mini)
         m.add_checkbutton(label="Seguir o cursor", variable=self._v_seguir,
                           command=lambda: self.alternar("seguir", False))
-        m.add_checkbutton(label="Abrir junto com o Claude", variable=self._v_auto,
-                          command=lambda: self.alternar("automatico", True))
+        if not self.cfg.get("vigia"):  # abrir junto depende do gancho do plugin
+            m.add_checkbutton(label="Abrir junto com o Claude", variable=self._v_auto,
+                              command=lambda: self.alternar("automatico", True))
         self._v_som = tk.BooleanVar(value=bool(self.cfg.get("som", True)))
         self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
         m.add_checkbutton(label="Aviso sonoro (padrão das conversas)", variable=self._v_som,

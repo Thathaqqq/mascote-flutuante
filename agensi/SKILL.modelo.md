@@ -17,7 +17,9 @@ Esta versão é a skill, sem ganchos (hooks). O mascote lê, no próprio computa
 
 - **Trabalhando** e **Pronto para revisar**: confiáveis.
 - **Precisa de você**: certo quando o Claude faz uma pergunta; quando ele espera uma permissão, é um palpite (uma ferramenta parada há mais de 15 segundos, sem resposta). Um comando demorado pode aparecer como "precisa de você".
-- Nada sai do computador. O mascote guarda só o começo do último pedido de cada conversa, para mostrar na lista.
+- O mascote em si não usa a internet: ele lê o histórico no próprio computador e guarda, em `~/.claude/mascote/estado`, um arquivinho por conversa com o estado, a pasta do projeto e o começo do último pedido. O chat rápido é a exceção: ele manda a pergunta pelo seu Claude Code.
+- Quando o palpite é "talvez pedindo permissão", o mascote não toca som.
+- Se o plugin do mascote também estiver instalado, os ganchos dele mandam e a leitura do histórico fica parada.
 - Em outros assistentes (Cursor, Codex etc.) o mascote abre e os comandos funcionam, mas ele não acompanha o trabalho: o histórico que ele lê é o do Claude Code.
 
 Para o estado exato (com ganchos e abrindo junto com o Claude), instale o plugin: `claude plugin marketplace add Thathaqqq/mascote-flutuante` e `claude plugin install mascote-flutuante@mascote-flutuante`.
@@ -37,6 +39,8 @@ Todos os comandos usam `python "<pasta da skill>/scripts/iniciar.py" ...`.
 | Pousar na janela ativa | `iniciar.py config pousar sim` (ou `nao`) |
 
 Ligue sempre com `iniciar.py vigia` (e não só `iniciar.py`): é o que faz o mascote ler o histórico.
+
+Sem pedido específico (só "/mascote-flutuante"): ligue o mascote com `iniciar.py vigia` e diga em uma linha o que dá para mudar.
 
 Personagens prontos: Frida (pug preta em 3D), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `<pasta da skill>/personagens`).
 

@@ -7,9 +7,8 @@ import json
 import os
 import sys
 import time
-from pathlib import Path
 
-PASTA = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "mascote" / "estado"
+import estado
 
 ESTADO_POR_EVENTO = {
     "UserPromptSubmit": "trabalhando",
@@ -31,44 +30,34 @@ def main():
         dados = {}
     evento = evento or dados.get("hook_event_name", "")
     sessao = dados.get("session_id") or "sem-id"
-    PASTA.mkdir(parents=True, exist_ok=True)
-    arquivo = PASTA / f"{sessao}.json"
+    estado.PASTA.mkdir(parents=True, exist_ok=True)
+    estado.MARCA_GANCHOS.touch()  # avisa o vigia que o plugin cuida das conversas
 
     if evento == "SessionEnd":
-        arquivo.unlink(missing_ok=True)
+        estado.apagar(sessao)
         return
 
-    estado = ESTADO_POR_EVENTO.get(evento)
-    if not estado:
+    novo = ESTADO_POR_EVENTO.get(evento)
+    if not novo:
         return
 
-    anterior = {}
-    if arquivo.exists():
-        try:
-            anterior = json.loads(arquivo.read_text(encoding="utf-8"))
-        except Exception:
-            anterior = {}
-
+    anterior = estado.ler(sessao)
     registro = {
         "sessao": sessao,
-        "estado": estado,
+        "estado": novo,
         "pasta": dados.get("cwd") or anterior.get("pasta", ""),
         "pedido": anterior.get("pedido", ""),
         "aviso": "",
         "quando": time.time(),
         "fins": anterior.get("fins", 0) + (1 if evento == "Stop" else 0),  # quantas vezes terminou
         "chamadas": anterior.get("chamadas", 0) + (1 if evento == "Notification" else 0),
+        "fonte": "gancho",
     }
     if evento == "UserPromptSubmit":
-        pedido = " ".join((dados.get("prompt") or "").split())
-        if pedido and not pedido.startswith("<"):  # avisos automáticos do sistema não são pedido da pessoa
-            registro["pedido"] = pedido[:120]
+        registro["pedido"] = estado.limpar_pedido(dados.get("prompt")) or registro["pedido"]
     if evento == "Notification":
         registro["aviso"] = (dados.get("message") or "")[:160]
-
-    tmp = arquivo.with_suffix(".tmp")
-    tmp.write_text(json.dumps(registro, ensure_ascii=False), encoding="utf-8")
-    os.replace(tmp, arquivo)
+    estado.gravar(registro)
 
 
 if __name__ == "__main__":

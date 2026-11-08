@@ -24,6 +24,8 @@ Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py"
 | Aviso sonoro | `iniciar.py config som sim` (ou `nao`) |
 | Pousar na janela ativa | `iniciar.py config pousar sim` (ou `nao`) |
 
+Sem pedido específico (só "/mascote"): ligue o mascote e diga em uma linha o que dá para mudar.
+
 Personagens prontos: Frida (pug preta em 3D), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `${CLAUDE_PLUGIN_ROOT}/personagens`).
 
 Requisito para o 3D e para as bordas suaves: Pillow (`python -m pip install pillow`). Sem ele o mascote funciona, mas só com os personagens de quadradinhos. Se faltar, pergunte à pessoa antes de instalar.
@@ -53,8 +55,6 @@ Serve para qualquer borboleta fotografada de cima, de asas abertas.
 
 `centro` é onde fica o corpo na largura da foto (0.5 = no meio). As asas da foto ganham volume e batida; o corpo e as antenas da foto são trocados por um modelo 3D.
 3. `iniciar.py validar "<arquivo .json>"` e depois `iniciar.py config personagem "<nome>"`.
-
-Sem pedido específico (só "/mascote"): ligue o mascote e diga em uma linha o que dá para mudar.
 
 ## Criar um personagem personalizado
 
