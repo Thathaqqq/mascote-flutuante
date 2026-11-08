@@ -1,6 +1,6 @@
 ---
 name: mascote-flutuante
-description: Floating desktop mascot (pet) that shows what Claude Code is doing (working, needs you, done) - including Frida, a black pug in 3D. Turns the mascot on/off, configures it and creates custom characters. Use when the person says "mascote", "mascot", "pet", "ligar/desligar o mascote", "trocar o personagem", "Frida", "criar meu personagem" or types /mascote-flutuante.
+description: Floating desktop mascot (pet) that shows what Claude Code is doing (working, needs you, done) - including Frida, a black pug. Turns the mascot on/off, configures it and creates custom characters. Use when the person says "mascote", "mascot", "pet", "ligar/desligar o mascote", "trocar o personagem", "Frida", "criar meu personagem" or types /mascote-flutuante.
 ---
 
 # Mascote flutuante
@@ -42,13 +42,13 @@ Ligue sempre com `iniciar.py vigia` (e não só `iniciar.py`): é o que faz o ma
 
 Sem pedido específico (só "/mascote-flutuante"): ligue o mascote com `iniciar.py vigia` e diga em uma linha o que dá para mudar.
 
-Personagens prontos: Frida (pug preta em 3D), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `<pasta da skill>/personagens`).
+Personagens prontos: Frida (pug preta, ilustrada), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `<pasta da skill>/personagens`).
 
 Requisito para os personagens 3D e para as bordas suaves: Pillow (`python -m pip install pillow`). Sem ele o mascote funciona, mas só com os personagens de quadradinhos. Se faltar, pergunte à pessoa antes de instalar.
 
 ## A Frida
 
-Pug preta em 3D: olhos grandes que acompanham o cursor, cabeça que inclina curiosa, orelhas que balançam no pulo, rabinho que abana e língua de fora quando está feliz. Trabalhando, ela lê com os olhos de um lado para o outro; quando o trabalho fica pronto, abana o rabo rápido e sorri; quando precisa de você, pula; quando algo trava, fica com o olhinho caído. Para usar: `iniciar.py config personagem Frida`.
+Pug preta ilustrada no estilo de desenho animado. Ela ganha volume e vira para o lado do cursor, inclina a cabeça curiosa e respira. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, abaixa a cabeça; quando o trabalho fica pronto, brilha. Para usar: `iniciar.py config personagem Frida`.
 
 {{COMUM}}
 ## Como o mascote funciona (para explicar se perguntarem)

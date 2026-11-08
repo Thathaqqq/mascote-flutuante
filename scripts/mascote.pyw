@@ -29,7 +29,6 @@ try:
     import borboleta3d
     from camada import Camada
     import foto3d
-    import pug3d
     import recorte
     TEM_PIL = True
 except Exception:
@@ -79,7 +78,7 @@ def salvar_config(cfg):
 
 
 def eh_3d(p):
-    return p.get("tipo") in ("borboleta3d", "foto", "pug3d")
+    return p.get("tipo") in ("borboleta3d", "foto")
 
 
 def carregar_personagens():
@@ -92,10 +91,7 @@ def carregar_personagens():
             p = ler_json(arq, None)
             if not p:
                 continue
-            if p.get("tipo") == "pug3d":  # modelada em código, não precisa de imagem
-                if not TEM_PIL:
-                    continue
-            elif eh_3d(p):
+            if eh_3d(p):
                 if not TEM_PIL or not (arq.parent / p.get("imagem", "")).is_file():
                     continue
                 p["_imagem"] = str(arq.parent / p["imagem"])
@@ -170,7 +166,6 @@ class Mascote:
         self.borboletas = {}
         self.voo = borboleta3d.Voo() if TEM_PIL else None
         self.bicho = foto3d.Bicho() if TEM_PIL else None
-        self.frida = pug3d.Frida() if TEM_PIL else None
         self.cache_img = {}
         self.vigia = vigia.Vigia()  # sem o plugin (instalado só como skill), lê o histórico das conversas
 
@@ -221,11 +216,9 @@ class Mascote:
 
     def borboleta(self, p):
         mini = bool(self.cfg.get("mini"))
-        chave = (p.get("_imagem", p.get("tipo")), mini)
+        chave = (p["_imagem"], mini)
         if chave not in self.borboletas:
-            if p.get("tipo") == "pug3d":
-                self.borboletas[chave] = pug3d.Pug3D(54 if mini else 130)
-            elif p.get("tipo") == "foto":
+            if p.get("tipo") == "foto":
                 self.borboletas[chave] = foto3d.Foto3D(p["_imagem"], 54 if mini else 130)
             else:
                 self.borboletas[chave] = borboleta3d.Borboleta3D(p["_imagem"], p.get("centro", 0.5),
@@ -331,7 +324,6 @@ class Mascote:
             if vel > 1800 and agora < 230 and agora < antes and not self.cursor_dentro:
                 self.voo.susto()
                 self.bicho.susto()
-                self.frida.susto()
         self.ultimo_cursor = (cx, cy)
 
         if clicou_agora() and not self.cursor_dentro:
@@ -340,7 +332,6 @@ class Mascote:
             if self.voo:
                 self.voo.agito()
                 self.bicho.agito()
-                self.frida.agito()
 
         self.andando = False
         if self.cfg.get("seguir") and not self.arraste:
@@ -521,23 +512,17 @@ class Mascote:
         caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
         return y0 + caixa[1], x0 + caixa[2] - (10 if mini else 26)
 
-    # personagem de foto (e a Frida, que se mexe do mesmo jeito)
+    # personagem de foto
     def desenhar_foto(self, tela, dt):
         p = self.personagem()
         mini = self.cfg.get("mini")
         modelo = self.borboleta(p)
-        if p.get("tipo") == "pug3d":
-            yaw, pitch, roll, amasso, lado, brilho, alt, extra = self.frida.passo(
-                dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado)
-            pose = (yaw, pitch, roll, amasso, lado, brilho, extra)
-        else:
-            yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
-                dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
-                p.get("espelhar", True))
-            pose = (yaw, pitch, roll, amasso, lado, brilho)
+        yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
+            dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
+            p.get("espelhar", True))
         if mini:
             alt *= 0.4
-        sprite, (px_, py_) = modelo.desenhar(*pose)
+        sprite, (px_, py_) = modelo.desenhar(yaw, pitch, roll, amasso, lado, brilho)
         chao = self.altura - (8 if mini else 16)
         meio = self.largura / 2
         caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
@@ -552,7 +537,7 @@ class Mascote:
         tela = Image.new("RGBA", (self.largura, self.altura), (0, 0, 0, 0))
         e = self.estado
         mini = self.cfg.get("mini")
-        if self.personagem().get("tipo") in ("foto", "pug3d"):
+        if self.personagem().get("tipo") == "foto":
             topo, direita = self.desenhar_foto(tela, dt)
         elif eh_3d(self.personagem()):
             topo, direita = self.desenhar_borboleta(tela, dt)

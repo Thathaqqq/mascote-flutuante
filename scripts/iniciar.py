@@ -65,9 +65,6 @@ def validar(caminho):
         return False
     if not p.get("nome"):
         erros.append("falta 'nome'")
-    if p.get("tipo") == "pug3d":  # modelada em código: só precisa do nome
-        print("Personagem OK." if not erros else "Problemas: " + "; ".join(erros))
-        return not erros
     if p.get("tipo") in ("borboleta3d", "foto"):
         img = Path(caminho).parent / p.get("imagem", "")
         if not img.is_file():

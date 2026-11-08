@@ -1,4 +1,6 @@
 {
   "nome": "Frida",
-  "tipo": "pug3d"
+  "tipo": "foto",
+  "imagem": "frida.png",
+  "espelhar": false
 }

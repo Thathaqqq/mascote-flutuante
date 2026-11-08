@@ -26,7 +26,7 @@ Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py"
 
 Sem pedido específico (só "/mascote"): ligue o mascote e diga em uma linha o que dá para mudar.
 
-Personagens prontos: Frida (pug preta em 3D), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `${CLAUDE_PLUGIN_ROOT}/personagens`).
+Personagens prontos: Frida (pug preta, ilustrada), Borboleta IBA (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `${CLAUDE_PLUGIN_ROOT}/personagens`).
 
 Requisito para o 3D e para as bordas suaves: Pillow (`python -m pip install pillow`). Sem ele o mascote funciona, mas só com os personagens de quadradinhos. Se faltar, pergunte à pessoa antes de instalar.
 

@@ -2,7 +2,7 @@
 
 A floating desktop mascot that shows what Claude Code is doing: **working**, **needs you** or **done**. It sits on top of your windows, follows the cursor with its eyes, jumps when you click and has a quick chat bar. The mascot's texts are in Portuguese.
 
-Meet **Frida**, a black pug in 3D. Her big eyes follow your cursor, she tilts her head when she's curious and her ears bounce when she jumps. She wags her tail and sticks her tongue out when your work is ready. While Claude works, she reads from side to side. When Claude needs you, she jumps. Other characters: a 3D blue morpho butterfly, pixel characters (Clawd, cat, robot, ghost), and your own from a photo of your pet.
+Meet **Frida**, a black pug illustrated in an animated-film style. She gets volume and turns toward your cursor, tilts her head when she's curious and breathes. While Claude works, she hops. When Claude needs you, she keeps jumping. When something breaks, she lowers her head. When your work is ready, she glows. Other characters: a 3D blue morpho butterfly, pixel characters (Clawd, cat, robot, ghost), and your own from a photo of your pet.
 
 ## Install
 
@@ -27,4 +27,4 @@ Windows and Mac. Open source (MIT): https://github.com/Thathaqqq/mascote-flutuan
 
 ---
 
-**Em português:** mascote que mostra o que o Claude Code está fazendo, com a Frida, uma pug preta em 3D. Descompacte em `~/.claude/skills/`, instale o Pillow e digite `/mascote-flutuante`. Esta versão lê o histórico das conversas no próprio computador. O aviso "precisa de você" é um palpite quando o Claude espera uma permissão (e não toca som). Para o estado exato, use o plugin (com ganchos).
+**Em português:** mascote que mostra o que o Claude Code está fazendo, com a Frida, uma pug preta ilustrada. Descompacte em `~/.claude/skills/`, instale o Pillow e digite `/mascote-flutuante`. Esta versão lê o histórico das conversas no próprio computador. O aviso "precisa de você" é um palpite quando o Claude espera uma permissão (e não toca som). Para o estado exato, use o plugin (com ganchos).
