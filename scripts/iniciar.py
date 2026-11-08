@@ -2,6 +2,7 @@
 
   python iniciar.py              liga o mascote (se já estiver ligado, não faz nada)
   python iniciar.py auto         usado ao abrir o Claude: liga só se o início automático estiver ativo
+  python iniciar.py vigia        liga lendo o histórico das conversas (para quem instalou só a skill, sem o plugin)
   python iniciar.py parar        desliga
   python iniciar.py recarregar   relê configuração e personagens
   python iniciar.py validar ARQ  confere um personagem personalizado
@@ -19,7 +20,7 @@ import os
 BASE = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "mascote"
 CONFIG = BASE / "config.json"
 PORTA = 47653
-CHAVES_SIM_NAO = {"mini", "seguir", "automatico", "som", "pousar"}
+CHAVES_SIM_NAO = {"mini", "seguir", "automatico", "som", "pousar", "vigia"}
 
 
 def enviar(comando):
@@ -64,6 +65,9 @@ def validar(caminho):
         return False
     if not p.get("nome"):
         erros.append("falta 'nome'")
+    if p.get("tipo") == "pug3d":
+        print("Personagem OK.")
+        return True
     if p.get("tipo") in ("borboleta3d", "foto"):
         img = Path(caminho).parent / p.get("imagem", "")
         if not img.is_file():
@@ -104,6 +108,15 @@ def main():
             ligar()
     elif acao == "ligar":
         ligar()
+    elif acao == "vigia":
+        cfg = ler_config()
+        cfg["vigia"] = True
+        BASE.mkdir(parents=True, exist_ok=True)
+        CONFIG.write_text(json.dumps(cfg, ensure_ascii=False), encoding="utf-8")
+        if not enviar("recarregar"):
+            ligar()
+        else:
+            print("Mascote ligado, lendo o histórico das conversas.")
     elif acao == "parar":
         print("Mascote desligado." if enviar("sair") else "O mascote não estava ligado.")
     elif acao == "recarregar":
