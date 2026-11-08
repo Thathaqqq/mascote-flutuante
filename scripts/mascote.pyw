@@ -96,8 +96,8 @@ def carregar_personagens():
                 if not TEM_PIL or not (arq.parent / p.get("imagem", "")).is_file():
                     continue
                 p["_imagem"] = str(arq.parent / p["imagem"])
-                feliz = arq.parent / p.get("imagem_feliz", "")
-                if p.get("imagem_feliz") and feliz.is_file():  # carinha alegre, para os momentos felizes
+                feliz = arq.parent / str(p.get("imagem_feliz", ""))
+                if isinstance(p.get("imagem_feliz"), str) and feliz.is_file():  # carinha alegre, nos momentos felizes
                     p["_imagem_feliz"] = str(feliz)
             elif not (p.get("mapa") and p.get("cores")):
                 continue
@@ -223,11 +223,14 @@ class Mascote:
 
     def borboleta(self, p, imagem=None):
         mini = bool(self.cfg.get("mini"))
-        imagem = imagem or p["_imagem"]
-        chave = (imagem, mini)
+        chave = (imagem or p["_imagem"], mini)
         if chave not in self.borboletas:
-            if p.get("tipo") == "foto":
-                self.borboletas[chave] = foto3d.Foto3D(imagem, 54 if mini else 130)
+            if p.get("tipo") == "foto" and imagem:
+                # carinha alegre: mesmo recorte da principal (a troca não mexe o desenho) e cache menor
+                caixa = Image.open(p["_imagem"]).convert("RGBA").getchannel("A").getbbox()
+                self.borboletas[chave] = foto3d.Foto3D(imagem, 54 if mini else 130, caixa, limite=100)
+            elif p.get("tipo") == "foto":
+                self.borboletas[chave] = foto3d.Foto3D(p["_imagem"], 54 if mini else 130)
             else:
                 self.borboletas[chave] = borboleta3d.Borboleta3D(p["_imagem"], p.get("centro", 0.5),
                                                                  58 if mini else 150)
@@ -250,6 +253,7 @@ class Mascote:
         elif cmd == "recarregar":
             self.cfg = ler_json(CONFIG, {})
             self.personagens = carregar_personagens()
+            self.borboletas = {}
             self.aplicar_tamanho()
 
     # --- tamanho ---
@@ -291,7 +295,11 @@ class Mascote:
             marca = (s.get("fins", 0), s.get("chamadas", 0), s.get("estado"))
             agora_por_sessao[sid] = marca
             antes = self.estado_por_sessao.get(sid)
-            if not self.iniciado or antes is None or tocou or not self.som_da(sid):
+            if not self.iniciado or antes is None:
+                continue
+            if marca[0] > antes[0]:
+                self.alegre_ate = time.time() + 4  # uma conversa acabou de terminar: comemora um pouquinho
+            if tocou or not self.som_da(sid):
                 continue
             # palpite do vigia (talvez pedindo permissão) não toca: pode ser só um comando demorado
             entrou = marca[2] != antes[2] and marca[2] in ("esperando", "pronto") and not s.get("palpite")
@@ -299,8 +307,6 @@ class Mascote:
                 plataforma.tocar_som(marca[2], self.cfg.get("som_nome"), self.cfg.get("som_arquivo"))
                 tocou = True
         self.estado_por_sessao = agora_por_sessao
-        if novo == "pronto" and self.estado != "pronto" and self.iniciado:
-            self.alegre_ate = time.time() + 4  # comemora um pouquinho quando o trabalho fica pronto
         self.estado = novo
         self.iniciado = True
         if self.bandeja:
@@ -825,6 +831,7 @@ class Mascote:
     def trocar_personagem(self, nome):
         self.cfg["personagem"] = nome
         salvar_config(self.cfg)
+        self.borboletas = {}  # libera os modelos do personagem anterior
         self.aplicar_tamanho()
 
     def criar_com_foto(self):

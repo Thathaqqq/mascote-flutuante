@@ -61,8 +61,8 @@ def _limpar_borda(img):
     w, h = img.size
     for y in range(h):
         for x in range(w):
-            # só a franja colada no corpo (uns 3 px); detalhes finos mais longe ficam com a própria cor
-            if 0 < pa[x, y] < 250 and pp[x, y] > 60:
+            # só a franja do corpo (uns 7 px); detalhes finos mais longe ficam com a própria cor
+            if 0 < pa[x, y] < 250 and pp[x, y] > 8:
                 k = 255 / pp[x, y]
                 r, g, b = pc[x, y]
                 px[x, y] = (min(255, int(r * k)), min(255, int(g * k)), min(255, int(b * k)), pa[x, y])

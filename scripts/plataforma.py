@@ -73,7 +73,12 @@ def clicou_agora():
     """Clique do botão esquerdo em qualquer lugar da tela (desde a última olhada)."""
     global _clique_antes
     if WIN:
-        return bool(user32.GetAsyncKeyState(0x01) & 0x8001)
+        estado = user32.GetAsyncKeyState(0x01)
+        apertado = bool(estado & 0x8000)
+        # só a descida do botão (segurar ou arrastar não conta de novo); o bit 1 pega cliques rápidos entre olhadas
+        novo = not _clique_antes and (apertado or bool(estado & 0x0001))
+        _clique_antes = apertado
+        return novo
     if MAC and _qz:
         apertado = _qz.CGEventSourceButtonState(0, 0)
         novo = apertado and not _clique_antes

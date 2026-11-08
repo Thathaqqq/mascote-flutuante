@@ -40,7 +40,7 @@ Pelo Claude:
 3. Se der erro de fundo, recorte antes: com o conector do Canva (remover fundo), se estiver disponível, ou no Paint do Windows (Remover plano de fundo). Depois rode de novo com o PNG.
 4. Mostre o recorte à pessoa (abra o PNG criado em `~/.claude/mascote/personagens/`) e aplique com `iniciar.py config personagem "<Nome>"`.
 
-Opcional: com uma segunda foto da mesma pose e do mesmo enquadramento, sorrindo, acrescente `"imagem_feliz": "<arquivo>.png"` no .json; o mascote usa essa carinha por alguns segundos quando o trabalho fica pronto, quando a pessoa passa o mouse em cima e quando clica.
+Opcional: com uma segunda imagem sorrindo, já recortada, do mesmo tamanho e com o bicho no mesmo lugar da principal, acrescente `"imagem_feliz": "<arquivo>.png"` no .json; o mascote usa essa carinha por alguns segundos quando o trabalho fica pronto, quando a pessoa passa o mouse em cima e quando clica.
 
 O personagem de foto ganha volume, vira para o lado do cursor, inclina a cabeça, respira e pula. Para não espelhar a foto (ex.: tem texto), acrescente `"espelhar": false` no .json.
 

@@ -16,9 +16,11 @@ TIRAS = 12  # faixas verticais que dão o volume
 
 
 class Foto3D:
-    def __init__(self, caminho, altura=130):
+    def __init__(self, caminho, altura=130, caixa=None, limite=300):
+        """caixa: recorte a usar (a da imagem principal, para a carinha alegre cair no mesmo lugar)."""
         img = Image.open(caminho).convert("RGBA")
-        caixa = img.getchannel("A").getbbox()
+        caixa = caixa or img.getchannel("A").getbbox()
+        self.limite = limite
         if caixa:
             img = img.crop(caixa)
         esc = altura * SUPER / img.height
@@ -95,7 +97,7 @@ class Foto3D:
         tela = tela.resize((self.OW // SUPER, self.OH // SUPER), Image.LANCZOS)
         resultado = (tela, (pe[0] / SUPER, pe[1] / SUPER))
         self.cache[chave] = resultado
-        if len(self.cache) > 300:
+        if len(self.cache) > self.limite:
             self.cache.popitem(last=False)
         return resultado
 
