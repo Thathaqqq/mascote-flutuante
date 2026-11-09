@@ -164,6 +164,8 @@ class Mascote:
         self.chat = None
         self.chat_obj = None
         self.chat_fora_desde = None
+        self.clique_pendente = None  # clique simples espera um pouco: pode virar clique duplo (abre o chat)
+        self.duplo_ate = 0.0
         self.iniciado = False
         self.estado_por_sessao = {}
         self.ultima_aberta = None
@@ -197,6 +199,7 @@ class Mascote:
         self.canvas.bind("<ButtonPress-1>", self.ao_apertar)
         self.canvas.bind("<B1-Motion>", self.ao_arrastar)
         self.canvas.bind("<ButtonRelease-1>", self.ao_soltar)
+        self.canvas.bind("<Double-Button-1>", self.ao_clique_duplo)
         self.canvas.bind("<Button-3>", self.abrir_menu)
 
         self.aplicar_tamanho()
@@ -746,7 +749,10 @@ class Mascote:
 
     # --- mouse no mascote ---
     def ao_apertar(self, ev):
-        self.arraste = (ev.x_root, ev.y_root, self.root.winfo_x(), self.root.winfo_y(), False)
+        if self.clique_pendente:  # novo aperto que não virou clique duplo (ex.: arrastar): esquece o clique anterior
+            self.root.after_cancel(self.clique_pendente)
+            self.clique_pendente = None
+        self.arraste =(ev.x_root, ev.y_root, self.root.winfo_x(), self.root.winfo_y(), False)
 
     def ao_arrastar(self, ev):
         if not self.arraste:
@@ -769,7 +775,28 @@ class Mascote:
         if a and a[0] - 3 <= ev.x <= a[2] + 3 and a[1] - 3 <= ev.y <= a[3] + 3:
             self.alternar_bandeja()
             return
+        if time.time() < self.duplo_ate:  # soltar do segundo clique do clique duplo
+            return
+        # espera para ver se vem o segundo clique; se vier, abre o chat em vez de ir à conversa
+        if self.clique_pendente:
+            self.root.after_cancel(self.clique_pendente)
+        self.clique_pendente = self.root.after(500, self._clique_simples)  # a mesma janela do clique duplo do Tk
+
+    def _clique_simples(self):
+        self.clique_pendente = None
         self.ir_para_proxima()
+
+    def ao_clique_duplo(self, ev):
+        """Dois cliques no mascote abrem (ou fecham) o chat rápido."""
+        a = self.area_numero
+        if a and a[0] - 3 <= ev.x <= a[2] + 3 and a[1] - 3 <= ev.y <= a[3] + 3:
+            return
+        if self.clique_pendente:
+            self.root.after_cancel(self.clique_pendente)
+            self.clique_pendente = None
+        self.arraste = None
+        self.duplo_ate = time.time() + 0.6
+        self.alternar_chat()
 
     def som_da(self, sid):
         return self.cfg.get("som_conversas", {}).get(sid, self.cfg.get("som", True))
@@ -1036,14 +1063,13 @@ class Mascote:
             self.chat_obj.posicionar(x + self.largura / 2, y + 10, y + pes)
 
     def cuidar_do_chat(self):
-        """Barra aparece com o mouse no mascote e some se ficar sem uso."""
+        """A barra abre com dois cliques (ou o atalho) e some se ficar sem uso."""
         c = self.garantir_chat()
-        if self.cursor_dentro and not self.arraste:
-            if not c.aberto:
-                self.posicionar_chat()
-                c.abrir()
+        if not c.aberto:
             self.chat_fora_desde = None
-        elif c.aberto:
+        elif self.cursor_dentro and not self.arraste:
+            self.chat_fora_desde = None
+        else:
             if c.em_uso(posicao_cursor()):
                 self.chat_fora_desde = None
             elif self.chat_fora_desde is None:

@@ -97,6 +97,6 @@ Regras do desenho:
 
 - Balão e cor: azul trabalhando, amarelo precisa de você, verde pronto para revisar, vermelho algo travou.
 - Clique no mascote: vai para a conversa que está chamando; cada clique leva à próxima. Clique no número: lista de conversas (clicar numa abre aquela conversa; "Som ligado"/"Sem som" escolhe o som só dela). Botão direito: menu.
-- Chat rápido: barra embaixo do mascote, aparece com o mouse em cima ou Ctrl+Alt+Espaço; respostas em balões, conversa continua (usa o comando `claude` do Claude Code).
+- Chat rápido: barra embaixo do mascote, abre com dois cliques no mascote ou Ctrl+Alt+Espaço; respostas em balões, conversa continua (usa o comando `claude` do Claude Code).
 - Os olhos seguem o cursor; quando você clica em qualquer lugar, os de quadradinhos pulam e os de foto sorriem; ele diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
 - O estado vem dos ganchos do plugin, gravados em `~/.claude/mascote/estado`. Só guarda o começo do último pedido de cada conversa, no próprio computador.

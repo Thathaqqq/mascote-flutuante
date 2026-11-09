@@ -1,7 +1,7 @@
 """Chat rápido do mascote, no estilo "barra embaixo do personagem".
 
 - Barra branca arredondada logo abaixo do mascote: "+" (nova conversa), campo
-  "Iniciar novo chat" e botão de enviar. Aparece ao passar o mouse no mascote
+  "Iniciar novo chat" e botão de enviar. Abre com dois cliques no mascote
   ou pelo atalho, e some sozinha se não estiver em uso.
 - As respostas aparecem num cartão acima do mascote, em balões; a conversa
   continua entre uma pergunta e outra (o Claude lembra o que foi dito).

@@ -14,7 +14,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 - Clique no mascote: vai direto para a conversa que está chamando (primeiro as que precisam de você, depois as travadas e as prontas). Clique de novo: vai para a próxima que está chamando. Sem nenhuma chamando, abre o Claude.
 - Clique no número ao lado dele: lista das conversas, com o título, o estado de cada uma e o começo do último pedido. Clicar numa conversa abre aquela conversa no aplicativo do Claude (aba Code). Conversas do terminal abrem só o Claude.
 - Botão direito: menu com chat rápido, modo mini, seguir o cursor, personagem e sair.
-- Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço (no Mac, Control+Option+Espaço), de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
+- Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Abre com dois cliques no mascote ou com Ctrl+Alt+Espaço (no Mac, Control+Option+Espaço), de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
 - Os olhos acompanham o cursor do mouse; quando você clica em qualquer lugar, os de quadradinhos pulam e os de foto sorriem; ele diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
