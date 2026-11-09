@@ -28,6 +28,7 @@ try:
     from PIL import Image, ImageChops, ImageDraw, ImageFont
     import borboleta3d
     from camada import Camada
+    import fantoche
     import foto3d
     import recorte
     TEM_PIL = True
@@ -78,7 +79,7 @@ def salvar_config(cfg):
 
 
 def eh_3d(p):
-    return p.get("tipo") in ("borboleta3d", "foto")
+    return p.get("tipo") in ("borboleta3d", "foto", "fantoche")
 
 
 def carregar_personagens():
@@ -173,6 +174,11 @@ class Mascote:
         self.borboletas = {}
         self.voo = borboleta3d.Voo() if TEM_PIL else None
         self.bicho = foto3d.Bicho() if TEM_PIL else None
+        self.fantoches = {}  # nome do personagem -> Fantoche (recortado uma vez)
+        self.anim = fantoche.Animador() if TEM_PIL else None
+        self.anim_estado = None
+        self.anim_prox = 0.0  # quando pode repetir o sinal (latido, pata)
+        self.anim_espirro = 40.0  # próximo espirro à toa
         self.cache_img = {}
         self.vigia = vigia.Vigia()  # sem o plugin (instalado só como skill), lê o histórico das conversas
 
@@ -350,6 +356,8 @@ class Mascote:
             if self.voo:
                 self.voo.agito()
                 self.bicho.agito()
+            if self.anim and self.anim.gesto is None:
+                self.anim.prox_inclina = self.anim.t  # inclina a cabeça, curiosa
 
         self.andando = False
         if self.cfg.get("seguir") and not self.arraste:
@@ -468,7 +476,9 @@ class Mascote:
     def texto_balao(self):
         e, f = self.estado, self.quadro // 2
         texto = TEXTO_ESTADO[e]
-        if e == "esperando" and self.bicho and self.bicho.latido and self.personagem().get("tipo") == "foto":
+        tipo = self.personagem().get("tipo")
+        if e == "esperando" and ((tipo == "foto" and self.bicho and self.bicho.latido)
+                                 or (tipo == "fantoche" and self.anim and self.anim.gesto == "latido")):
             texto = "Au! Au!"
         elif e == "trabalhando":
             qtd = sum(1 for s in self.sessoes if s.get("estado") == "trabalhando") + (1 if self.chat_rodando else 0)
@@ -557,11 +567,60 @@ class Mascote:
         tela.alpha_composite(sprite, (max(0, x0), max(0, y0)), (max(0, -x0), max(0, -y0)))
         return y0 + caixa[1], x0 + caixa[2] - (6 if mini else 14)
 
+    # ilustração animada em partes (fantoche): fica parada e só dá sinal
+    def desenhar_fantoche(self, tela, dt):
+        p = self.personagem()
+        mini = bool(self.cfg.get("mini"))
+        nome = p.get("nome")
+        if nome not in self.fantoches:
+            try:
+                self.fantoches[nome] = fantoche.Fantoche(p["_imagem"], p.get("partes", {}), p.get("_imagem_feliz"))
+            except Exception:  # partes com problema: a ilustração parada, sem derrubar o mascote
+                self.fantoches[nome] = fantoche.Fantoche(p["_imagem"], {})
+        fan, an, e = self.fantoches[nome], self.anim, self.estado
+        agora = an.t + dt
+        if e != self.anim_estado:
+            self.anim_estado, self.anim_prox = e, agora + 0.4
+        if an.gesto is None and agora >= self.anim_prox:
+            if e == "esperando":
+                an.comecar("latido")  # precisa de você: late
+                self.anim_prox = agora + 4
+            elif e == "pronto":
+                an.comecar("pata")  # pronto para revisar: dá a pata
+                self.anim_prox = agora + 5
+            elif e in ("ocioso", "trabalhando") and agora >= self.anim_espirro:
+                an.comecar("espirro")  # espirro de pug, de vez em quando
+                self.anim_espirro = agora + 45 + (agora * 7.1) % 40
+        pose = an.pose(dt)
+        if e == "bloqueado":  # travou: olhos meio fechados, orelhas caídas
+            pose["olhos"] = max(pose["olhos"], 0.45)
+            pose["orelha_e"], pose["orelha_d"] = 8, -8
+            pose["desce"] = 3
+        elif self.cursor_dentro and an.gesto is None:
+            pose["boca"] = max(pose["boca"], 0.6)  # contente com o mouse em cima
+        try:
+            sprite = fan.desenhar(pose, 54 if mini else 130)
+        except Exception:  # um quadro com problema não para a animação: mostra a ilustração parada
+            alt = 54 if mini else 130
+            sprite = fan.base.resize((max(4, round(fan.base.width * alt / fan.base.height)), alt))
+        chao = self.altura - (8 if mini else 16)
+        meio = self.largura / 2
+        caixa = sprite.getbbox() or (0, 0, sprite.width, sprite.height)
+        base = sprite.crop((caixa[0], caixa[3] - max(2, (caixa[3] - caixa[1]) // 5), caixa[2], caixa[3]))
+        sombra = borboleta3d.sombra_de(base, 0)
+        tela.alpha_composite(sombra, (int(meio - sombra.width / 2), int(chao - sombra.height / 2)))
+        x0 = int(meio - sprite.width / 2)
+        y0 = int(chao - caixa[3] + pose["desce"] * (0.4 if mini else 1))
+        tela.alpha_composite(sprite, (max(0, x0), max(0, y0)), (max(0, -x0), max(0, -y0)))
+        return y0 + caixa[1], x0 + caixa[2] - (6 if mini else 14)
+
     def desenhar_imagem(self, dt):
         tela = Image.new("RGBA", (self.largura, self.altura), (0, 0, 0, 0))
         e = self.estado
         mini = self.cfg.get("mini")
-        if self.personagem().get("tipo") == "foto":
+        if self.personagem().get("tipo") == "fantoche":
+            topo, direita = self.desenhar_fantoche(tela, dt)
+        elif self.personagem().get("tipo") == "foto":
             topo, direita = self.desenhar_foto(tela, dt)
         elif eh_3d(self.personagem()):
             topo, direita = self.desenhar_borboleta(tela, dt)

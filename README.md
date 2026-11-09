@@ -26,7 +26,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 
 Prontos: Frida (pug preta, ilustrada), Borboleta Azul (3D), Borboleta, Gato, Robô e Fantasma.
 
-A **Frida** é uma pug preta ilustrada no estilo de desenho animado (imagens originais, criadas para o mascote, sob a mesma licença MIT). Como os personagens de foto, ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa e respira. Fica parada a maior parte do tempo e só se mexe para dar sinal: enquanto o Claude trabalha, fica quieta; quando ele precisa de você, late ("Au! Au!", com a boca abrindo e um impulso para a frente); quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto para revisar, dá a pata. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma.
+A **Frida** é uma pug preta ilustrada no estilo de desenho animado (imagens originais, criadas para o mascote, sob a mesma licença MIT). Ela é animada como um fantoche: cada parte se mexe no próprio ponto, sem esticar a imagem. Fica parada a maior parte do tempo: pisca, uma orelha balança sozinha, o rabo balança devagar e de vez em quando ela inclina a cabeça ou dá um espirro de pug. Só se mexe mais para dar sinal: quando o Claude precisa de você, late ("Au! Au!", com a boca abrindo, a língua aparecendo e as orelhas balançando); quando o trabalho fica pronto para revisar, dá a pata; quando algo trava, fica de olhos meio fechados e orelhas caídas. Com o mouse em cima, abre a boca, contente.
 
 A Borboleta Azul é uma morpho-azul desenhada para o mascote (imagem original). As asas da foto ganham volume, curvatura e brilho conforme a luz; corpo e antenas são modelados em 3D. Ela reage ao cursor:
 

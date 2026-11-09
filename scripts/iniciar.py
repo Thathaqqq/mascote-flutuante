@@ -65,7 +65,7 @@ def validar(caminho):
         return False
     if not p.get("nome"):
         erros.append("falta 'nome'")
-    if p.get("tipo") in ("borboleta3d", "foto"):
+    if p.get("tipo") in ("borboleta3d", "foto", "fantoche"):
         img = Path(caminho).parent / p.get("imagem", "")
         for chave, rotulo in (("imagem_feliz", "a imagem feliz"), ("imagem_pata", "a imagem da pata")):
             extra = p.get(chave)

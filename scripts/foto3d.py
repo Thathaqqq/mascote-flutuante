@@ -211,4 +211,5 @@ class Bicho:
         self.pitch = _lerp(self.pitch, pitch_alvo, min(1.0, dt * 5))
         self.roll = _lerp(self.roll, roll_alvo, min(1.0, dt * 7))
         self.brilho = _lerp(self.brilho, 1.0 if (dentro or estado == "pronto") else 0.0, min(1.0, dt * 4))
-        return self.yaw, self.pitch, self.roll, self.amasso, self.lado, self.brilho, self.altura
+        # a imagem não estica, não achata e não gira em perspectiva: só inclina, vira de lado e troca de quadro
+        return 0.0, 0.0, self.roll, 1.0, self.lado, self.brilho, self.altura

@@ -48,7 +48,7 @@ Requisito para os personagens 3D e para as bordas suaves: Pillow (`python -m pip
 
 ## A Frida
 
-Pug preta ilustrada no estilo de desenho animado. Ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa e respira. Fica parada a maior parte do tempo e só se mexe para dar sinal: enquanto o Claude trabalha, fica quieta; quando ele precisa de você, late ("Au! Au!", com a boca abrindo e um impulso para a frente); quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto para revisar, dá a pata. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma. Para usar: `iniciar.py config personagem Frida`.
+Pug preta ilustrada no estilo de desenho animado, animada como um fantoche: cada parte se mexe no próprio ponto, sem esticar a imagem. Fica parada a maior parte do tempo: pisca, balança uma orelha e o rabo, inclina a cabeça e espirra de vez em quando. Só dá sinal: late quando o Claude precisa de você, dá a pata quando o trabalho fica pronto para revisar e fica de olhos meio fechados quando algo trava. Para usar: `iniciar.py config personagem Frida`.
 
 {{COMUM}}
 ## Como o mascote funciona (para explicar se perguntarem)
