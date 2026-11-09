@@ -42,7 +42,7 @@ Ligue sempre com `iniciar.py vigia` (e não só `iniciar.py`): é o que faz o ma
 
 Sem pedido específico (só "/mascote-flutuante"): ligue o mascote com `iniciar.py vigia` e diga em uma linha o que dá para mudar.
 
-Personagens prontos: Frida (pug preta, ilustrada), Borboleta Azul (3D), Clawd, Borboleta, Gato, Robô, Fantasma (arquivos em `<pasta da skill>/personagens`).
+Personagens prontos: Frida (pug preta, ilustrada), Borboleta Azul (3D), Borboleta, Gato, Robô, Fantasma (arquivos em `<pasta da skill>/personagens`).
 
 Requisito para os personagens 3D e para as bordas suaves: Pillow (`python -m pip install pillow`). Sem ele o mascote funciona, mas só com os personagens de quadradinhos. Se faltar, pergunte à pessoa antes de instalar.
 

@@ -59,9 +59,9 @@ TEXTO_ESTADO = {
     "ocioso": "",
 }
 PRIORIDADE = ["esperando", "bloqueado", "pronto", "trabalhando"]
-RESERVA = {"nome": "Clawd", "cores": {"X": "#D97757", "E": "#1F1F1F"}, "mapa": [
-    "..XXXXXXXX..", "..XXXXXXXX..", "..XEXXXXEX..", "..XEXXXXEX..", "XXXXXXXXXXXX",
-    "XXXXXXXXXXXX", "..XXXXXXXX..", "..X.X..X.X..", "..X.X..X.X.."]}
+RESERVA = {"nome": "Gato", "cores": {"X": "#6B7280", "N": "#F9A8D4", "E": "#111111"}, "mapa": [
+    ".X........X.", ".XX......XX.", ".XXXXXXXXXX.", ".XEXXXXXXEX.", ".XXXXNNXXXX.",
+    "..XXXXXXXX..", ".XXXXXXXXXX.", ".XXXXXXXXXX.", ".X.X....X.X."]}
 
 # ---------- utilidades ----------
 
@@ -101,7 +101,7 @@ def carregar_personagens():
             elif not (p.get("mapa") and p.get("cores")):
                 continue
             todos[p.get("nome") or arq.stem] = p
-    return todos or {"Clawd": RESERVA}
+    return todos or {RESERVA["nome"]: RESERVA}
 
 
 def ha_quanto(ts):
@@ -216,7 +216,8 @@ class Mascote:
 
     def personagem(self):
         nome = self.cfg.get("personagem")
-        return self.personagens.get(nome) or self.personagens.get("Clawd") or next(iter(self.personagens.values()))
+        return (self.personagens.get(nome) or self.personagens.get("Frida")
+                or self.personagens.get(RESERVA["nome"]) or next(iter(self.personagens.values())))
 
     def borboleta(self, p, imagem=None):
         mini = bool(self.cfg.get("mini"))
