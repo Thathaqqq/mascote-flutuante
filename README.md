@@ -15,7 +15,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 - Clique no número ao lado dele: lista das conversas, com o título, o estado de cada uma e o começo do último pedido. Clicar numa conversa abre aquela conversa no aplicativo do Claude (aba Code). Conversas do terminal abrem só o Claude.
 - Botão direito: menu com chat rápido, modo mini, seguir o cursor, personagem e sair.
 - Chat rápido: uma barra arredondada embaixo do mascote ("Iniciar novo chat"). Aparece ao passar o mouse nele ou com Ctrl+Alt+Espaço (no Mac, Control+Option+Espaço), de qualquer programa. As respostas aparecem em balões num cartão acima do mascote, e a conversa continua de uma pergunta para outra. O "+" começa uma conversa nova; Esc fecha.
-- Os olhos acompanham o cursor do mouse; ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima.
+- Os olhos acompanham o cursor do mouse; quando você clica em qualquer lugar, os de quadradinhos pulam e os de foto sorriem; ele diz "Oi!" quando o cursor passa por cima.
 - Seguir o cursor: ele anda atrás do mouse pela tela.
 - Modo mini: fica pequeno, só com o número colorido.
 - Aviso sonoro: um som discreto do sistema quando uma conversa precisa de você ou termina. Na lista de conversas, cada uma tem "Som ligado" ou "Sem som": clique para escolher só para aquela conversa. O "Aviso sonoro" do menu vale para as conversas que você não ajustou. Em "Som do aviso", no menu, você escolhe o som (Notificação, Mensagem, E-mail, Calendário, Sino, Ding, Carrilhão, Acorde, Tada, Toque, Proximidade ou Cutucada); ao escolher, ele toca para você ouvir. Em "Meu arquivo de som", use um som seu (WAV ou MP3).
@@ -26,7 +26,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 
 Prontos: Frida (pug preta, ilustrada), Borboleta Azul (3D), Borboleta, Gato, Robô e Fantasma.
 
-A **Frida** é uma pug preta ilustrada no estilo de desenho animado (imagens originais, criadas para o mascote, sob a mesma licença MIT). Como os personagens de foto, ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa, respira e pula quando você clica. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto, abre um sorriso por alguns segundos. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma.
+A **Frida** é uma pug preta ilustrada no estilo de desenho animado (imagens originais, criadas para o mascote, sob a mesma licença MIT). Como os personagens de foto, ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa e respira. Fica parada a maior parte do tempo e só se mexe para dar sinal: enquanto o Claude trabalha, fica quieta; quando ele precisa de você, late ("Au! Au!", com a boca abrindo e um impulso para a frente); quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto para revisar, dá a pata. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma.
 
 A Borboleta Azul é uma morpho-azul desenhada para o mascote (imagem original). As asas da foto ganham volume, curvatura e brilho conforme a luz; corpo e antenas são modelados em 3D. Ela reage ao cursor:
 
@@ -42,7 +42,7 @@ A Borboleta Azul é uma morpho-azul desenhada para o mascote (imagem original). 
 
 Também dá para transformar qualquer foto de borboleta (vista de cima, fundo transparente) numa borboleta 3D: peça "/mascote cria uma borboleta 3D com esta foto".
 
-**Com a sua foto:** botão direito no mascote > Personagem > Criar personagem com foto... Escolha a foto (do seu cachorro, gato, de você) e dê um nome. Com fundo liso, o fundo sai sozinho; com fundo cheio de coisas, recorte antes no Paint do Windows (Remover plano de fundo). O personagem de foto vira para o lado do cursor, inclina a cabeça curioso, respira, pula quando você clica, fica pulando quando o Claude precisa de você e fica quietinho quando ele termina.
+**Com a sua foto:** botão direito no mascote > Personagem > Criar personagem com foto... Escolha a foto (do seu cachorro, gato, de você) e dê um nome. Com fundo liso, o fundo sai sozinho; com fundo cheio de coisas, recorte antes no Paint do Windows (Remover plano de fundo). O personagem de foto vira para o lado do cursor, inclina a cabeça curioso, respira e fica parado a maior parte do tempo: quando o Claude precisa de você, dá um impulso para a frente (com a imagem sorrindo, abre a boca, como um latido), e fica quietinho quando ele termina.
 
 Para criar um de quadradinhos, peça ao Claude: "/mascote cria um personagem de cachorro caramelo". Ele desenha, confere e já troca. Também dá para desenhar à mão: menu do botão direito, Personagem, Abrir pasta de personagens; lá há um exemplo comentado no arquivo `exemplo.json.txt`.
 

@@ -2,5 +2,6 @@
   "nome": "Frida",
   "tipo": "foto",
   "imagem": "frida.png",
-  "imagem_feliz": "frida-sorrindo.png"
+  "imagem_feliz": "frida-sorrindo.png",
+  "imagem_pata": "frida-pata.png"
 }

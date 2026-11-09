@@ -40,9 +40,9 @@ Pelo Claude:
 3. Se der erro de fundo, recorte antes: com o conector do Canva (remover fundo), se estiver disponível, ou no Paint do Windows (Remover plano de fundo). Depois rode de novo com o PNG.
 4. Mostre o recorte à pessoa (abra o PNG criado em `~/.claude/mascote/personagens/`) e aplique com `iniciar.py config personagem "<Nome>"`.
 
-Opcional: com uma segunda imagem sorrindo, já recortada, do mesmo tamanho e com o bicho no mesmo lugar da principal, acrescente `"imagem_feliz": "<arquivo>.png"` no .json; o mascote usa essa carinha por alguns segundos quando o trabalho fica pronto, quando a pessoa passa o mouse em cima e quando clica.
+Opcional: com uma segunda imagem sorrindo, já recortada, do mesmo tamanho e com o bicho no mesmo lugar da principal, acrescente `"imagem_feliz": "<arquivo>.png"` no .json; o mascote usa essa carinha por alguns segundos quando o trabalho fica pronto, quando a pessoa passa o mouse em cima, quando clica e para latir quando precisa da pessoa. Com uma imagem do bicho dando a pata, nas mesmas condições, acrescente `"imagem_pata": "<arquivo>.png"`: ele dá a pata quando o trabalho fica pronto para revisar.
 
-O personagem de foto ganha volume, vira para o lado do cursor, inclina a cabeça, respira e pula. Para não espelhar a foto (ex.: tem texto), acrescente `"espelhar": false` no .json.
+O personagem de foto ganha volume, vira para o lado do cursor, inclina a cabeça e respira; fica parado e só se mexe para dar sinal. Para não espelhar a foto (ex.: tem texto), acrescente `"espelhar": false` no .json.
 
 ## Criar uma borboleta 3D a partir de uma foto
 
@@ -98,5 +98,5 @@ Regras do desenho:
 - Balão e cor: azul trabalhando, amarelo precisa de você, verde pronto para revisar, vermelho algo travou.
 - Clique no mascote: vai para a conversa que está chamando; cada clique leva à próxima. Clique no número: lista de conversas (clicar numa abre aquela conversa; "Som ligado"/"Sem som" escolhe o som só dela). Botão direito: menu.
 - Chat rápido: barra embaixo do mascote, aparece com o mouse em cima ou Ctrl+Alt+Espaço; respostas em balões, conversa continua (usa o comando `claude` do Claude Code).
-- Os olhos seguem o cursor, ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
+- Os olhos seguem o cursor; quando você clica em qualquer lugar, os de quadradinhos pulam e os de foto sorriem; ele diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
 - O estado vem dos ganchos do plugin, gravados em `~/.claude/mascote/estado`. Só guarda o começo do último pedido de cada conversa, no próprio computador.

@@ -67,21 +67,22 @@ def validar(caminho):
         erros.append("falta 'nome'")
     if p.get("tipo") in ("borboleta3d", "foto"):
         img = Path(caminho).parent / p.get("imagem", "")
-        feliz = p.get("imagem_feliz")
-        if feliz is not None and not isinstance(feliz, str):
-            erros.append("'imagem_feliz' precisa ser o nome de um arquivo")
-        elif feliz and not (Path(caminho).parent / feliz).is_file():
-            erros.append(f"não achei a imagem '{feliz}' na mesma pasta")
-        elif feliz and img.is_file():
-            try:
-                from PIL import Image
-                a, b = Image.open(img), Image.open(Path(caminho).parent / feliz)
-                if a.size != b.size:
-                    erros.append("a imagem feliz precisa ter o mesmo tamanho e enquadramento da principal")
-                elif b.mode != "RGBA" or b.getchannel("A").getextrema()[0] > 0:
-                    erros.append("a imagem feliz precisa ter fundo transparente (PNG recortado)")
-            except ImportError:
-                pass
+        for chave, rotulo in (("imagem_feliz", "a imagem feliz"), ("imagem_pata", "a imagem da pata")):
+            extra = p.get(chave)
+            if extra is not None and not isinstance(extra, str):
+                erros.append(f"'{chave}' precisa ser o nome de um arquivo")
+            elif extra and not (Path(caminho).parent / extra).is_file():
+                erros.append(f"não achei a imagem '{extra}' na mesma pasta")
+            elif extra and img.is_file():
+                try:
+                    from PIL import Image
+                    a, b = Image.open(img), Image.open(Path(caminho).parent / extra)
+                    if a.size != b.size:
+                        erros.append(f"{rotulo} precisa ter o mesmo tamanho e enquadramento da principal")
+                    elif b.mode != "RGBA" or b.getchannel("A").getextrema()[0] > 0:
+                        erros.append(f"{rotulo} precisa ter fundo transparente (PNG recortado)")
+                except ImportError:
+                    pass
         if not img.is_file():
             erros.append(f"não achei a imagem '{p.get('imagem')}' na mesma pasta")
         else:

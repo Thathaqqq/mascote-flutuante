@@ -48,7 +48,7 @@ Requisito para os personagens 3D e para as bordas suaves: Pillow (`python -m pip
 
 ## A Frida
 
-Pug preta ilustrada no estilo de desenho animado. Ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa, respira e pula quando você clica. Enquanto o Claude trabalha, dá pulinhos; quando ele precisa de você, pula sem parar; quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto, abre um sorriso por alguns segundos. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma. Para usar: `iniciar.py config personagem Frida`.
+Pug preta ilustrada no estilo de desenho animado. Ela ganha volume, vira para o lado do cursor, inclina a cabeça curiosa quando está à toa e respira. Fica parada a maior parte do tempo e só se mexe para dar sinal: enquanto o Claude trabalha, fica quieta; quando ele precisa de você, late ("Au! Au!", com a boca abrindo e um impulso para a frente); quando algo trava, fica de cabeça baixa; quando o trabalho fica pronto para revisar, dá a pata. Ela também sorri quando você passa o mouse em cima ou clica; no resto do tempo, fica com a carinha calma. Para usar: `iniciar.py config personagem Frida`.
 
 {{COMUM}}
 ## Como o mascote funciona (para explicar se perguntarem)
@@ -56,5 +56,5 @@ Pug preta ilustrada no estilo de desenho animado. Ela ganha volume, vira para o 
 - Balão e cor: azul trabalhando, amarelo precisa de você, verde pronto para revisar, vermelho algo travou.
 - Clique no mascote: vai para a conversa que está chamando; cada clique leva à próxima. Clique no número: lista de conversas. Botão direito: menu.
 - Chat rápido: barra embaixo do mascote, aparece com o mouse em cima ou Ctrl+Alt+Espaço; usa o comando `claude` do Claude Code.
-- Os olhos seguem o cursor, ele pula quando você clica em qualquer lugar e diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
+- Os olhos seguem o cursor; quando você clica em qualquer lugar, os de quadradinhos pulam e os de foto sorriem; ele diz "Oi!" quando o cursor passa por cima. Com "Seguir o cursor", ele anda atrás do mouse.
 - Os estados ficam em `~/.claude/mascote/estado`, no próprio computador.

@@ -2,7 +2,7 @@
 
 A foto vira uma superfície levemente abaulada, como um boneco de papelão com
 volume: ela gira para o cursor com perspectiva, a luz muda conforme o giro,
-inclina a cabeça, respira, pula com amassadinho na aterrissagem e se vira
+inclina a cabeça, respira, dá sinais (latido, pata) e se vira
 para o lado do cursor. Só usa Pillow.
 """
 import math
@@ -118,15 +118,17 @@ class Bicho:
         self.pulo_ate = 0.0
         self.susto_ate = 0.0
         self.inclinar_ate = 0.0
-        self.proxima_inclinada = 4.0
+        self.proxima_inclinada = 6.0
+        self.expressao = None  # None, "boca" (latido) ou "pata" (dando a pata)
+        self.latido = False  # True durante o "au au", para o balão
+        self.sinal_desde = None  # quando começou o estado que pede sinal
+        self.sinal_estado = None
 
     def susto(self):
-        self.susto_ate = self.t + 0.6
-        self._pular(260)
+        self.susto_ate = self.t + 0.6  # vira o rosto, sem pular
 
     def agito(self):
-        if self.altura < 1:
-            self._pular(170)
+        pass  # parada: o clique só deixa a carinha alegre
 
     def _pular(self, forca):
         if self.altura < 2:
@@ -150,25 +152,42 @@ class Bicho:
         roll_alvo = 0.0
         respiro = 1 + 0.018 * math.sin(t * 2.2)
 
-        if estado == "trabalhando":
-            if self.altura < 1 and math.sin(t * 7) > 0.95:
-                self._pular(110)  # trotinho
-        elif estado == "esperando":
-            if self.altura < 1:
-                self._pular(220)  # pulando, querendo atenção
+        # fica parada, só respirando; mexe só para dar sinal
+        self.expressao = None
+        self.latido = False
+        if estado != self.sinal_estado:
+            self.sinal_estado, self.sinal_desde = estado, t
+        fase = t - self.sinal_desde
+        if estado == "esperando":
+            # latido de pug: "au, au" com a boca abrindo e o corpo indo para a frente, a cada 4 s
+            c = fase % 4.0
+            if c < 1.0:
+                self.latido = True
+                for ini in (0.0, 0.42):  # dois latidos
+                    if ini <= c < ini + 0.24:
+                        k = math.sin((c - ini) / 0.24 * math.pi)
+                        self.expressao = "boca"
+                        pitch_alvo -= 9 * k
+                        respiro *= 1 + 0.07 * k
+                        if c - ini < 0.05 and self.altura < 0.5:
+                            self._pular(55)  # saltinho do latido
+        elif estado == "pronto":
+            # dá a pata: levanta, abaixa, levanta de novo, a cada 5 s
+            c = fase % 5.0
+            if c < 0.55 or 0.8 <= c < 1.4:
+                self.expressao = "pata"
+                roll_alvo = -5 * self.lado
         elif estado == "bloqueado":
             pitch_alvo += 12
             respiro *= 0.94
-        elif estado != "pronto":
-            # parado à toa: de vez em quando inclina a cabeça, curioso (com trabalho pronto, fica quieto)
+        elif estado != "trabalhando":
+            # à toa: de vez em quando inclina a cabeça, curioso
             if t > self.proxima_inclinada:
                 self.inclinar_ate = t + 1.4
-                self.proxima_inclinada = t + 5 + (t * 7.3) % 5
+                self.proxima_inclinada = t + 9 + (t * 7.3) % 6
         if dentro:
             self.inclinar_ate = max(self.inclinar_ate, t + 0.2)
-            if self.altura < 1 and math.sin(t * 5) > 0.9:
-                self._pular(120)
-        if t < self.inclinar_ate:
+        if t < self.inclinar_ate and self.expressao != "pata":
             roll_alvo = 11 * self.lado
         if andando:
             roll_alvo = -6 * virado

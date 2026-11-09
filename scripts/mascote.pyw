@@ -98,6 +98,9 @@ def carregar_personagens():
                 feliz = arq.parent / str(p.get("imagem_feliz", ""))
                 if isinstance(p.get("imagem_feliz"), str) and feliz.is_file():  # carinha alegre, nos momentos felizes
                     p["_imagem_feliz"] = str(feliz)
+                pata = arq.parent / str(p.get("imagem_pata", ""))
+                if isinstance(p.get("imagem_pata"), str) and pata.is_file():  # dando a pata (pronto para revisar)
+                    p["_imagem_pata"] = str(pata)
             elif not (p.get("mapa") and p.get("cores")):
                 continue
             todos[p.get("nome") or arq.stem] = p
@@ -465,7 +468,9 @@ class Mascote:
     def texto_balao(self):
         e, f = self.estado, self.quadro // 2
         texto = TEXTO_ESTADO[e]
-        if e == "trabalhando":
+        if e == "esperando" and self.bicho and self.bicho.latido and self.personagem().get("tipo") == "foto":
+            texto = "Au! Au!"
+        elif e == "trabalhando":
             qtd = sum(1 for s in self.sessoes if s.get("estado") == "trabalhando") + (1 if self.chat_rodando else 0)
             texto = (f"Trabalhando em {qtd}" if qtd > 1 else texto) + "." * (f // 4 % 4)
         elif not texto and time.time() < self.dica_ate:
@@ -531,11 +536,14 @@ class Mascote:
     def desenhar_foto(self, tela, dt):
         p = self.personagem()
         mini = self.cfg.get("mini")
-        alegre = self.cursor_dentro or time.time() < self.alegre_ate
-        modelo = self.borboleta(p, p.get("_imagem_feliz") if alegre else None)
         yaw, pitch, roll, amasso, lado, brilho, alt = self.bicho.passo(
             dt, self.estado, self.rel_cursor, self.cursor_dentro, self.andando, self.virado,
             p.get("espelhar", True))
+        alegre = self.cursor_dentro or time.time() < self.alegre_ate or self.bicho.expressao == "boca"
+        if self.bicho.expressao == "pata" and p.get("_imagem_pata"):
+            modelo = self.borboleta(p, p["_imagem_pata"])
+        else:
+            modelo = self.borboleta(p, p.get("_imagem_feliz") if alegre else None)
         if mini:
             alt *= 0.4
         sprite, (px_, py_) = modelo.desenhar(yaw, pitch, roll, amasso, lado, brilho)
