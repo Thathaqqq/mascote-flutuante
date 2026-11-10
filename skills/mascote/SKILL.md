@@ -23,6 +23,7 @@ Todos os comandos abaixo usam `python "${CLAUDE_PLUGIN_ROOT}/scripts/iniciar.py"
 | Abrir junto com o Claude | `iniciar.py config automatico sim` (ou `nao`) |
 | Aviso sonoro | `iniciar.py config som sim` (ou `nao`) |
 | Pousar na janela ativa | `iniciar.py config pousar sim` (ou `nao`) |
+| Idioma dos textos (português ou inglês) | `iniciar.py config idioma pt` (ou `en`; `auto` segue o idioma do computador) |
 
 Sem pedido específico (só "/mascote"): ligue o mascote e diga em uma linha o que dá para mudar.
 

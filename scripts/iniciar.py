@@ -7,7 +7,7 @@
   python iniciar.py recarregar   relê configuração e personagens
   python iniciar.py validar ARQ  confere um personagem personalizado
   python iniciar.py foto FOTO NOME   cria um personagem a partir de uma foto (tira o fundo se for liso)
-  python iniciar.py config CHAVE VALOR   ex.: config personagem Gato | config mini sim
+  python iniciar.py config CHAVE VALOR   ex.: config personagem Gato | config mini sim | config idioma en
 """
 import json
 import socket
@@ -147,7 +147,16 @@ def main():
         chave, valor = sys.argv[2], " ".join(sys.argv[3:])
         cfg = ler_config()
         if chave in CHAVES_SIM_NAO:
-            valor = valor.lower() in ("sim", "s", "true", "1", "ligado")
+            valor = valor.lower() in ("sim", "s", "true", "1", "ligado", "yes", "y", "on")
+        elif chave == "personagem":  # aceita o nome em inglês dos personagens prontos
+            sys.path.insert(0, str(AQUI))
+            import idioma
+            valor = idioma.PERSONAGENS_EN.get(" ".join(valor.lower().split()), valor)
+        elif chave == "idioma":  # pt, en ou auto (segue o idioma do computador)
+            valor = valor.strip().lower()
+            valor = {"english": "en", "ingles": "en", "inglês": "en", "portugues": "pt", "português": "pt",
+                     "portuguese": "pt"}.get(valor, valor)
+            valor = valor if valor in ("pt", "en") else "auto"
         cfg[chave] = valor
         BASE.mkdir(parents=True, exist_ok=True)
         CONFIG.write_text(json.dumps(cfg, ensure_ascii=False), encoding="utf-8")

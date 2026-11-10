@@ -5,7 +5,7 @@ description: Floating desktop mascot (pet) that shows what Claude Code is doing 
 
 # Mascote flutuante
 
-O mascote é uma janelinha que fica por cima das outras e mostra o que o Claude Code está fazendo. Funciona no Windows e no Mac com Python 3 instalado. Os textos do mascote são em português.
+O mascote é uma janelinha que fica por cima das outras e mostra o que o Claude Code está fazendo. Funciona no Windows e no Mac com Python 3 instalado. Os textos do mascote aparecem em português ou em inglês, conforme o idioma do computador; dá para trocar no menu do botão direito (Idioma / Language).
 
 Os scripts estão na pasta `scripts` ao lado deste SKILL.md (a pasta da skill). Nos comandos abaixo, `<pasta da skill>` é essa pasta; use o caminho completo e entre aspas. No Mac, use `python3` no lugar de `python`.
 
@@ -37,6 +37,7 @@ Todos os comandos usam `python "<pasta da skill>/scripts/iniciar.py" ...`.
 | Seguir o cursor | `iniciar.py config seguir sim` (ou `nao`) |
 | Aviso sonoro | `iniciar.py config som sim` (ou `nao`) |
 | Pousar na janela ativa | `iniciar.py config pousar sim` (ou `nao`) |
+| Idioma dos textos (português ou inglês) | `iniciar.py config idioma pt` (ou `en`; `auto` segue o idioma do computador) |
 
 Ligue sempre com `iniciar.py vigia` (e não só `iniciar.py`): é o que faz o mascote ler o histórico.
 

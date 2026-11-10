@@ -16,6 +16,7 @@ import tkinter as tk
 from pathlib import Path
 
 import plataforma
+from idioma import tr
 from plataforma import FONTE_UI, FONTE_UI_FORTE
 
 try:
@@ -78,7 +79,7 @@ class Barra:
         self.ao_enviar, self.ao_nova, self.ao_esc = ao_enviar, ao_nova, ao_esc
         self.Wp, self.Hp, self.pad = int(330 * s), int(50 * s), int(12 * s)
         self.W, self.H = self.Wp + 2 * self.pad, self.Hp + 2 * self.pad
-        self.dica = "Iniciar novo chat"
+        self.dica = tr("Iniciar novo chat")
         self.com_dica = True
         self.ativo = False  # tem texto: botão de enviar forte
 
@@ -298,7 +299,7 @@ class Cartao:
         c.config(width=W, height=H)
         _redondo(c, 3, 5, W - 1, H - 1, 18 * s, fill=COR["sombra"], outline="")
         _redondo(c, 1, 1, W - 3, H - 4, 18 * s, fill=COR["cartao"], outline=COR["borda"])
-        c.create_text(18 * s, 20 * s, text="Chat rápido", anchor="w", font=(FONTE_UI_FORTE, 10),
+        c.create_text(18 * s, 20 * s, text=tr("Chat rápido"), anchor="w", font=(FONTE_UI_FORTE, 10),
                       fill=COR["titulo"])
         x = c.create_text(W - 18 * s, 19 * s, text="✕", anchor="e", font=(FONTE_UI, 10), fill=COR["apoio"])
         c.tag_bind(x, "<Button-1>", lambda e: self.ao_fechar())
@@ -324,8 +325,8 @@ class Cartao:
                              fill=COR["eu"] if eu else COR["claude"], outline="")
             cv.tag_lower(fundo)
             y += h + 16 * s
-            if not eu and not texto.startswith("Pensando"):
-                cp = cv.create_text(bx0 + 6 * s, y + 4 * s, text="Copiar", anchor="nw", font=self.f_peq,
+            if not eu and texto.rstrip(".") != tr("Pensando"):  # o "Pensando..." não tem o que copiar
+                cp = cv.create_text(bx0 + 6 * s, y + 4 * s, text=tr("Copiar"), anchor="nw", font=self.f_peq,
                                     fill=COR["apoio"])
                 cv.tag_bind(cp, "<Button-1>", lambda e, tx=texto, item=cp: self._copiar(tx, item))
                 _maozinha(cv, cp)
@@ -341,8 +342,8 @@ class Cartao:
     def _copiar(self, texto, item):
         self.root.clipboard_clear()
         self.root.clipboard_append(texto)
-        self.conv.itemconfig(item, text="Copiado")
-        self.root.after(1200, lambda: self.conv.winfo_exists() and self.conv.itemconfig(item, text="Copiar"))
+        self.conv.itemconfig(item, text=tr("Copiado"))
+        self.root.after(1200, lambda: self.conv.winfo_exists() and self.conv.itemconfig(item, text=tr("Copiar")))
 
     def posicionar(self, x_meio, y_base):
         self.j.geometry(f"+{int(x_meio - self.W / 2)}+{int(max(0, y_base - self.H))}")
@@ -410,7 +411,7 @@ class ChatRapido:
         if not self.rodando or not self.mensagens:
             return
         self.pontos = (self.pontos + 1) % 4
-        self.mensagens[-1] = ("claude", "Pensando" + "." * self.pontos)
+        self.mensagens[-1] = ("claude", tr("Pensando") + "." * self.pontos)
         self.cartao.desenhar(self.mensagens)
         self.root.after(350, self._animar_pensando)
 
@@ -419,13 +420,13 @@ class ChatRapido:
             return
         self.barra.limpar()
         self.mensagens.append(("eu", pergunta))
-        self.mensagens.append(("claude", "Pensando"))
+        self.mensagens.append(("claude", tr("Pensando")))
         self.rodando = True
         self.cartao.desenhar(self.mensagens)
         self.cartao.mostrar()
         if self.ultimo_pos:
             self.posicionar(*self.ultimo_pos)
-        self.barra.trocar_dica("Continuar a conversa")
+        self.barra.trocar_dica(tr("Continuar a conversa"))
         self._animar_pensando()
         self.ao_comecar()
 
@@ -454,13 +455,13 @@ class ChatRapido:
                                    encoding="utf-8", timeout=300, **plataforma.sem_janela())
                 try:
                     dados = json.loads(r.stdout)
-                    saida, sessao = dados.get("result") or "Sem resposta.", dados.get("session_id")
+                    saida, sessao = dados.get("result") or tr("Sem resposta."), dados.get("session_id")
                 except (ValueError, AttributeError):
-                    saida, sessao = (r.stdout or r.stderr or "Sem resposta.").strip(), None
+                    saida, sessao = (r.stdout or r.stderr or tr("Sem resposta.")).strip(), None
             except FileNotFoundError:
-                saida, sessao = "Não achei o Claude Code instalado (comando claude).", None
+                saida, sessao = tr("Não achei o Claude Code instalado (comando claude)."), None
             except subprocess.TimeoutExpired:
-                saida, sessao = "Demorou demais. Tente pelo Claude.", None
+                saida, sessao = tr("Demorou demais. Tente pelo Claude."), None
             self.root.after(0, lambda: self._fim(_limpar_markdown(saida), sessao))
 
         threading.Thread(target=rodar, daemon=True).start()
@@ -481,5 +482,12 @@ class ChatRapido:
         self.sessao = None
         self.mensagens = []
         self.cartao.esconder()
-        self.barra.trocar_dica("Iniciar novo chat")
+        self.barra.trocar_dica(tr("Iniciar novo chat"))
         self.barra.focar()
+
+    def atualizar_idioma(self):
+        """Depois de trocar o idioma: refaz a dica da barra e o título do cartão."""
+        self.barra.trocar_dica(tr("Continuar a conversa" if self.mensagens else "Iniciar novo chat"))
+        self.cartao._moldura()
+        if self.mensagens:
+            self.cartao.desenhar(self.mensagens)

@@ -20,8 +20,10 @@ import tkinter as tk
 from pathlib import Path
 
 import chat
+import idioma
 import plataforma
 import vigia
+from idioma import tr
 from plataforma import FONTE_UI, abrir, clicou_agora, focar_claude, posicao_cursor
 
 try:
@@ -111,10 +113,10 @@ def carregar_personagens():
 def ha_quanto(ts):
     s = max(0, int(time.time() - ts))
     if s < 60:
-        return "agora"
+        return tr("agora")
     if s < 3600:
-        return f"há {s // 60} min"
-    return f"há {s // 3600} h"
+        return tr("há {n} min").format(n=s // 60)
+    return tr("há {n} h").format(n=s // 3600)
 
 
 def ler_sessoes(com_vigia=False):
@@ -141,6 +143,7 @@ class Mascote:
     def __init__(self, servidor):
         self.servidor = servidor
         self.cfg = ler_json(CONFIG, {})
+        idioma.definir(self.cfg.get("idioma"))
         self.personagens = carregar_personagens()
         self.vistos = {}  # sessao -> quando já visto (pronto/bloqueado)
         self.sessoes = []
@@ -262,6 +265,7 @@ class Mascote:
             self.root.destroy()
         elif cmd == "recarregar":
             self.cfg = ler_json(CONFIG, {})
+            self.aplicar_idioma()
             self.personagens = carregar_personagens()
             self.borboletas = {}
             self.aplicar_tamanho()
@@ -478,18 +482,18 @@ class Mascote:
 
     def texto_balao(self):
         e, f = self.estado, self.quadro // 2
-        texto = TEXTO_ESTADO[e]
+        texto = tr(TEXTO_ESTADO[e])
         tipo = self.personagem().get("tipo")
         if e == "esperando" and ((tipo == "foto" and self.bicho and self.bicho.latido)
                                  or (tipo == "fantoche" and self.anim and self.anim.gesto == "latido")):
-            texto = "Au! Au!"
+            texto = tr("Au! Au!")
         elif e == "trabalhando":
             qtd = sum(1 for s in self.sessoes if s.get("estado") == "trabalhando") + (1 if self.chat_rodando else 0)
-            texto = (f"Trabalhando em {qtd}" if qtd > 1 else texto) + "." * (f // 4 % 4)
+            texto = (tr("Trabalhando em {n}").format(n=qtd) if qtd > 1 else texto) + "." * (f // 4 % 4)
         elif not texto and time.time() < self.dica_ate:
-            texto = "Clique para ir à conversa"
+            texto = tr("Clique para ir à conversa")
         elif not texto and self.cursor_dentro:
-            texto = "Oi!"
+            texto = tr("Oi!")
         return "" if self.cfg.get("mini") else texto
 
     # quadradinhos (com Pillow)
@@ -809,8 +813,8 @@ class Mascote:
 
     def escolher_arquivo_som(self):
         from tkinter import filedialog
-        arq = filedialog.askopenfilename(parent=self.root, title="Escolha o som do aviso",
-                                         filetypes=[("Sons", "*.wav *.mp3 *.m4a *.aiff"), ("Todos", "*.*")])
+        arq = filedialog.askopenfilename(parent=self.root, title=tr("Escolha o som do aviso"),
+                                         filetypes=[(tr("Sons"), "*.wav *.mp3 *.m4a *.aiff"), (tr("Todos"), "*.*")])
         if not arq:
             return
         self.cfg["som_arquivo"] = arq
@@ -860,54 +864,74 @@ class Mascote:
     def abrir_claude(self):
         self.marcar_vistos()
         if not focar_claude():
-            self.aviso("Não achei a janela do Claude aberta.")
+            self.aviso(tr("Não achei a janela do Claude aberta."))
 
     def abrir_menu(self, ev):
         m = tk.Menu(self.root, tearoff=0)
-        m.add_command(label="Abrir o Claude", command=self.abrir_claude)
-        m.add_command(label="Conversas", command=self.alternar_bandeja)
-        m.add_command(label="Chat rápido    " + plataforma.ATALHO_TEXTO, command=self.alternar_chat)
+        m.add_command(label=tr("Abrir o Claude"), command=self.abrir_claude)
+        m.add_command(label=tr("Conversas"), command=self.alternar_bandeja)
+        m.add_command(label=tr("Chat rápido") + "    " + tr(plataforma.ATALHO_TEXTO), command=self.alternar_chat)
         m.add_separator()
         self._v_mini = tk.BooleanVar(value=bool(self.cfg.get("mini")))
         self._v_seguir = tk.BooleanVar(value=bool(self.cfg.get("seguir")))
         self._v_auto = tk.BooleanVar(value=bool(self.cfg.get("automatico", True)))
         self._v_pers = tk.StringVar(value=self.personagem().get("nome", ""))
-        m.add_checkbutton(label="Modo mini", variable=self._v_mini, command=self.alternar_mini)
-        m.add_checkbutton(label="Seguir o cursor", variable=self._v_seguir,
+        m.add_checkbutton(label=tr("Modo mini"), variable=self._v_mini, command=self.alternar_mini)
+        m.add_checkbutton(label=tr("Seguir o cursor"), variable=self._v_seguir,
                           command=lambda: self.alternar("seguir", False))
         if not self.cfg.get("vigia"):  # abrir junto depende do gancho do plugin
-            m.add_checkbutton(label="Abrir junto com o Claude", variable=self._v_auto,
+            m.add_checkbutton(label=tr("Abrir junto com o Claude"), variable=self._v_auto,
                               command=lambda: self.alternar("automatico", True))
         self._v_som = tk.BooleanVar(value=bool(self.cfg.get("som", True)))
         self._v_pousar = tk.BooleanVar(value=bool(self.cfg.get("pousar")))
-        m.add_checkbutton(label="Aviso sonoro (padrão das conversas)", variable=self._v_som,
+        m.add_checkbutton(label=tr("Aviso sonoro (padrão das conversas)"), variable=self._v_som,
                           command=lambda: self.alternar("som", True))
         sons = tk.Menu(m, tearoff=0)
         self._v_som_nome = tk.StringVar(value="arquivo" if self.cfg.get("som_arquivo")
                                         else self.cfg.get("som_nome", plataforma.SOM_PADRAO))
         for nome in plataforma.SONS:
-            sons.add_radiobutton(label=nome, value=nome, variable=self._v_som_nome,
+            sons.add_radiobutton(label=tr(nome), value=nome, variable=self._v_som_nome,
                                  command=lambda n=nome: self.escolher_som(n))
         sons.add_separator()
-        sons.add_radiobutton(label="Meu arquivo de som", value="arquivo", variable=self._v_som_nome,
+        sons.add_radiobutton(label=tr("Meu arquivo de som"), value="arquivo", variable=self._v_som_nome,
                              command=self.escolher_arquivo_som)
-        m.add_cascade(label="Som do aviso", menu=sons)
+        m.add_cascade(label=tr("Som do aviso"), menu=sons)
         if plataforma.POUSO_DISPONIVEL:
-            m.add_checkbutton(label="Pousar na janela ativa", variable=self._v_pousar,
+            m.add_checkbutton(label=tr("Pousar na janela ativa"), variable=self._v_pousar,
                               command=lambda: self.alternar("pousar", False))
         sub = tk.Menu(m, tearoff=0)
         for nome in self.personagens:
-            sub.add_radiobutton(label=nome, value=nome, variable=self._v_pers,
+            sub.add_radiobutton(label=idioma.tr_nome(nome), value=nome, variable=self._v_pers,
                                 command=lambda n=nome: self.trocar_personagem(n))
         sub.add_separator()
         if TEM_PIL:
-            sub.add_command(label="Criar personagem com foto...", command=self.criar_com_foto)
-        sub.add_command(label="Abrir pasta de personagens", command=self.abrir_pasta_personagens)
-        sub.add_command(label="Recarregar personagens", command=lambda: self.comando("recarregar"))
-        m.add_cascade(label="Personagem", menu=sub)
+            sub.add_command(label=tr("Criar personagem com foto..."), command=self.criar_com_foto)
+        sub.add_command(label=tr("Abrir pasta de personagens"), command=self.abrir_pasta_personagens)
+        sub.add_command(label=tr("Recarregar personagens"), command=lambda: self.comando("recarregar"))
+        m.add_cascade(label=tr("Personagem"), menu=sub)
+        idiomas = tk.Menu(m, tearoff=0)
+        escolhido = str(self.cfg.get("idioma") or "").lower()
+        self._v_idioma = tk.StringVar(value=escolhido if escolhido in ("pt", "en") else "auto")
+        for rotulo, valor in ((tr("Automático"), "auto"), ("Português", "pt"), ("English", "en")):
+            idiomas.add_radiobutton(label=rotulo, value=valor, variable=self._v_idioma,
+                                    command=lambda v=valor: self.trocar_idioma(v))
+        m.add_cascade(label="Idioma / Language", menu=idiomas)
         m.add_separator()
-        m.add_command(label="Sair", command=self.root.destroy)
+        m.add_command(label=tr("Sair"), command=self.root.destroy)
         m.tk_popup(ev.x_root, ev.y_root)
+
+    def trocar_idioma(self, valor):
+        self.cfg["idioma"] = valor
+        salvar_config(self.cfg)
+        self.aplicar_idioma()
+
+    def aplicar_idioma(self):
+        """Passa a usar o idioma da configuração e refaz o que já está na tela com texto."""
+        idioma.definir(self.cfg.get("idioma"))
+        if self.chat_obj:
+            self.chat_obj.atualizar_idioma()
+        if self.bandeja:
+            self.preencher_bandeja(forcar=True)
 
     def alternar(self, chave, padrao):
         self.cfg[chave] = not self.cfg.get(chave, padrao)
@@ -928,23 +952,23 @@ class Mascote:
 
     def criar_com_foto(self):
         from tkinter import filedialog, messagebox, simpledialog
-        foto = filedialog.askopenfilename(parent=self.root, title="Escolha a foto do seu personagem",
-                                          filetypes=[("Fotos", "*.png *.jpg *.jpeg *.webp *.bmp"), ("Todos", "*.*")])
+        foto = filedialog.askopenfilename(parent=self.root, title=tr("Escolha a foto do seu personagem"),
+                                          filetypes=[(tr("Fotos"), "*.png *.jpg *.jpeg *.webp *.bmp"), (tr("Todos"), "*.*")])
         if not foto:
             return
-        nome = simpledialog.askstring("Nome do personagem", "Como ele se chama?", parent=self.root,
+        nome = simpledialog.askstring(tr("Nome do personagem"), tr("Como ele se chama?"), parent=self.root,
                                       initialvalue=Path(foto).stem.replace("_", " ").title())
         if not nome:
             return
         try:
             _, aviso = recorte.criar_personagem(foto, nome.strip())
         except Exception as erro:
-            messagebox.showwarning("Mascote", str(erro), parent=self.root)
+            messagebox.showwarning(tr("Mascote"), tr(str(erro)), parent=self.root)
             return
         self.personagens = carregar_personagens()
         self.trocar_personagem(nome.strip())
         if aviso:
-            self.aviso(aviso)
+            self.aviso(tr(aviso))
 
     def abrir_pasta_personagens(self):
         PASTA_PERSONAGENS.mkdir(parents=True, exist_ok=True)
@@ -979,7 +1003,7 @@ class Mascote:
         topo = tk.Frame(caixa, bg="white")
         topo.pack(fill="x")
         tk.Label(topo, text=titulo, bg="white", font=(FONTE_UI, 11, "bold")).pack(side="left")
-        x = tk.Label(topo, text="Fechar", bg="white", fg="#6B7280", cursor="hand2", font=(FONTE_UI, 9))
+        x = tk.Label(topo, text=tr("Fechar"), bg="white", fg="#6B7280", cursor="hand2", font=(FONTE_UI, 9))
         x.pack(side="right")
         x.bind("<Button-1>", lambda _: fechar())
 
@@ -1004,9 +1028,9 @@ class Mascote:
             w.destroy()
         caixa = tk.Frame(b, bg="white", padx=12, pady=10)
         caixa.pack(padx=1, pady=1)
-        self.cabecalho(caixa, "Conversas", self.alternar_bandeja)
+        self.cabecalho(caixa, tr("Conversas"), self.alternar_bandeja)
         if not self.sessoes:
-            tk.Label(caixa, text="Nenhuma conversa nas últimas 12 horas.", bg="white", fg="#6B7280",
+            tk.Label(caixa, text=tr("Nenhuma conversa nas últimas 12 horas."), bg="white", fg="#6B7280",
                      font=(FONTE_UI, 9)).pack(anchor="w", pady=(8, 0))
         for s in self.sessoes[:8]:
             e = s.get("estado", "ocioso")
@@ -1016,22 +1040,22 @@ class Mascote:
             tk.Label(linha, text="\u25CF", fg=COR_ESTADO["ocioso" if visto else e], bg="white",
                      font=(FONTE_UI, 11)).pack(side="left", anchor="n")
             som = self.som_da(s["sessao"])
-            botao_som = tk.Label(linha, text="Som ligado" if som else "Sem som", bg="white",
+            botao_som = tk.Label(linha, text=tr("Som ligado" if som else "Sem som"), bg="white",
                                  fg="#2F6FED" if som else "#9AA0A6", cursor="hand2", font=(FONTE_UI, 8))
             botao_som.pack(side="right", anchor="n", padx=(10, 0))
             botao_som.bind("<Button-1>", lambda _, sid=s["sessao"]: self.alternar_som_da(sid))
             txt = tk.Frame(linha, bg="white")
             txt.pack(side="left", fill="x", padx=(6, 0))
             info = plataforma.sessoes_do_app().get(s["sessao"], {})
-            nome = info.get("titulo") or Path(s.get("pasta") or "").name or "Conversa"
+            nome = info.get("titulo") or Path(s.get("pasta") or "").name or tr("Conversa")
             tk.Label(txt, text=nome, bg="white", font=(FONTE_UI, 9, "bold"), anchor="w").pack(fill="x")
-            pedido = s.get("aviso") if e == "esperando" and s.get("aviso") else s.get("pedido")
+            pedido = tr(s.get("aviso")) if e == "esperando" and s.get("aviso") else s.get("pedido")
             if pedido and pedido.startswith("<"):
                 pedido = ""
             if pedido:
                 tk.Label(txt, text=pedido[:60] + ("..." if len(pedido) > 60 else ""), bg="white",
                          fg="#374151", font=(FONTE_UI, 9), anchor="w", justify="left").pack(fill="x")
-            tk.Label(txt, text=f"{TEXTO_ESTADO.get(e) or 'Parada'} · {ha_quanto(s.get('quando', 0))}",
+            tk.Label(txt, text=f"{tr(TEXTO_ESTADO.get(e) or 'Parada')} · {ha_quanto(s.get('quando', 0))}",
                      bg="white", fg="#6B7280", font=(FONTE_UI, 8), anchor="w").pack(fill="x")
             for w in [linha, txt] + [w for w in linha.winfo_children() if w not in (botao_som, txt)]                     + list(txt.winfo_children()):
                 w.bind("<Button-1>", lambda _, sessao=s: self.abrir_conversa(sessao))

@@ -25,6 +25,7 @@ Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra 
 - Aviso sonoro: um som discreto do sistema quando uma conversa precisa de você ou termina. Na lista de conversas, cada uma tem "Som ligado" ou "Sem som": clique para escolher só para aquela conversa. O "Aviso sonoro" do menu vale para as conversas que você não ajustou. Em "Som do aviso", no menu, você escolhe o som (Notificação, Mensagem, E-mail, Calendário, Sino, Ding, Carrilhão, Acorde, Tada, Toque, Proximidade ou Cutucada); ao escolher, ele toca para você ouvir. Em "Meu arquivo de som", use um som seu (WAV ou MP3).
 - Pousar na janela ativa (só Windows por enquanto): ele senta na borda de cima da janela que você está usando e vai junto quando você troca de janela.
 - Arraste para mudar de lugar; ele lembra onde ficou.
+- Idioma: os textos aparecem em português ou em inglês, conforme o idioma do computador. Para trocar: botão direito > Idioma / Language.
 
 ## Personagens
 
@@ -84,6 +85,7 @@ Pelo menu do botão direito ou pedindo ao Claude com `/mascote`:
 - abrir junto com o Claude (liga e desliga o início automático)
 - aviso sonoro
 - pousar na janela ativa
+- idioma (português ou inglês)
 - desligar
 
 ## Privacidade

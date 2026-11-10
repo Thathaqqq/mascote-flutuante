@@ -13,7 +13,7 @@ A small character that sits in a corner of your screen, on top of your other win
 | Ready for review | green | Claude finished |
 | Something is stuck | red | the conversation stopped with an error |
 
-The mascot's own texts (balloons, menus) and the character names are in Portuguese. This page gives the Portuguese label in parentheses wherever you need it to find something.
+The mascot's texts (balloons, menus, character names) follow your computer's language: Portuguese on a Portuguese system, English otherwise. To switch, right-click the mascot > Idioma / Language. Where this page quotes a menu label in Portuguese, the English menu shows its translation.
 
 ## What it does
 
@@ -21,7 +21,7 @@ The mascot's own texts (balloons, menus) and the character names are in Portugue
 - Click the number beside it: a list of your conversations, with the title, the status of each one and the start of the last request. Clicking a conversation opens it in the Claude app (Code tab). Terminal conversations just open Claude.
 - Right-click: a menu with quick chat, mini mode, cursor following, character and quit.
 - Quick chat: a rounded bar below the mascot ("Iniciar novo chat"). It opens with a double-click on the mascot or with Ctrl+Alt+Space (on Mac, Control+Option+Space), from any app. Answers appear in balloons on a card above the mascot, and the conversation continues from one question to the next. The "+" starts a new conversation; Esc closes it.
-- The eyes follow your mouse cursor; when you click anywhere, the pixel characters jump and the photo characters smile; it says "Oi!" (hi) when the cursor passes over it.
+- The eyes follow your mouse cursor; when you click anywhere, the pixel characters jump and the photo characters smile; it says "Hi!" ("Oi!" in Portuguese) when the cursor passes over it.
 - Cursor following (Seguir o cursor): it walks after your mouse across the screen.
 - Mini mode (Modo mini): it gets small, showing only the colored number.
 - Sound alert: a discreet system sound when a conversation needs you or finishes. In the conversation list, each one shows "Som ligado" (sound on) or "Sem som" (muted): click to choose for that conversation only. The menu option "Aviso sonoro (padrão das conversas)" applies to the conversations you have not adjusted. In "Som do aviso", in the menu, you choose the sound; when you pick one, it plays so you can hear it. In "Meu arquivo de som", use a sound of your own (WAV or MP3).
@@ -32,7 +32,7 @@ The mascot's own texts (balloons, menus) and the character names are in Portugue
 
 Ready-made: Frida (black pug, illustrated), Borboleta Azul (Blue Butterfly, 3D), Borboleta (Butterfly), Gato (Cat), Robô (Robot) and Fantasma (Ghost).
 
-**Frida** is a black pug illustrated in an animated-film style (original images, created for the mascot, under the same MIT license). She is animated like a puppet: each part moves on its own point, without stretching the image. She stays still most of the time: she blinks, one ear twitches, her tail wags slowly, and now and then she tilts her head or does a pug sneeze. She only moves more to give a signal: when Claude needs you, she barks ("Au! Au!", mouth opening, tongue showing, ears swinging); when the work is ready for review, she raises a paw; when something is stuck, she half-closes her eyes and drops her ears. With the mouse over her, she opens her mouth, happy.
+**Frida** is a black pug illustrated in an animated-film style (original images, created for the mascot, under the same MIT license). She is animated like a puppet: each part moves on its own point, without stretching the image. She stays still most of the time: she blinks, one ear twitches, her tail wags slowly, and now and then she tilts her head or does a pug sneeze. She only moves more to give a signal: when Claude needs you, she barks ("Woof! Woof!", or "Au! Au!" in Portuguese; mouth opening, tongue showing, ears swinging); when the work is ready for review, she raises a paw; when something is stuck, she half-closes her eyes and drops her ears. With the mouse over her, she opens her mouth, happy.
 
 The **Blue Butterfly** is a blue morpho drawn for the mascot (original image). The wings gain volume, curvature and shine according to the light; the body and antennae are modeled in 3D. She reacts to the cursor:
 
@@ -88,6 +88,7 @@ From the right-click menu or by asking Claude with `/mascote`:
 - open together with Claude (turns auto-start on and off)
 - sound alert
 - land on the active window
+- language (Portuguese or English)
 - turn off
 
 ## Privacy
