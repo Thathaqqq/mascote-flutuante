@@ -9,7 +9,11 @@
     "mascote",
     "pet",
     "status",
-    "companheiro"
+    "companheiro",
+    "mascot",
+    "desktop-pet",
+    "companion",
+    "notifications"
   ],
   "license": "MIT",
   "homepage": "https://github.com/Thathaqqq/mascote-flutuante",

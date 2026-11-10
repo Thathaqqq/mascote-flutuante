@@ -1,6 +1,10 @@
 # Mascote do Claude
 
+**Português** · [English](README.en.md)
+
 Um bonequinho que fica num canto da tela, por cima das outras janelas, e mostra o que o Claude está fazendo enquanto você trabalha em outro programa.
+
+![Os seis personagens prontos: Frida, Borboleta Azul, Borboleta, Gato, Robô e Fantasma](docs/characters.png)
 
 | Balão | Cor | Quando |
 |---|---|---|
